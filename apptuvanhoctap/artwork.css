@@ -1,0 +1,455 @@
+/* User-supplied illustrations, with functional labels and controls kept in HTML. */
+.teaching-guide section {
+  margin: 20px 0;
+  padding-top: 14px;
+  border-top: 1px solid #dce5df;
+}
+.teaching-guide p,
+.teaching-guide li {
+  line-height: 1.75;
+}
+.teaching-guide li {
+  margin-bottom: 10px;
+}
+.teaching-guide ol,
+.teaching-guide ul {
+  padding-left: 24px;
+}
+.curriculum-picker {
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid #dce5df;
+  border-radius: 18px;
+  background: #f0f3e8;
+}
+.curriculum-picker summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 28px;
+}
+.curriculum-picker p {
+  line-height: 1.6;
+  margin-top: 12px;
+}
+.curriculum-filter {
+  display: grid;
+  gap: 8px;
+  max-width: 400px;
+  margin: 18px 0;
+}
+.illustration {
+  display: block;
+  object-fit: contain;
+  max-width: 100%;
+}
+.journey-greeting {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.greeting-buddy {
+  width: 100px;
+  height: 112px;
+  flex: 0 0 100px;
+}
+.illustrated-intro {
+  padding: 18px 24px;
+  background: #f0f3e8;
+  border: 1px solid #e0e8d9;
+  border-radius: 24px;
+}
+.illustrated-intro h2 {
+  margin-bottom: 8px;
+}
+.illustrated-intro p:last-child {
+  margin-bottom: 0;
+}
+.illustrated-intro > .button-row {
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: stretch;
+}
+.journey-map {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: 74px;
+  padding: 44px 36px;
+  margin: 24px 0;
+  border: 1px solid #e3e9da;
+  border-radius: 32px;
+  background: #fbfaf3 url("/assets/art/journey-background.webp") center/100%
+    100% no-repeat;
+}
+.journey-road {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  left: 0;
+  top: 185px;
+  width: 100%;
+  height: calc(100% - 370px);
+  overflow: visible;
+}
+.journey-road path {
+  fill: none;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.road-edge {
+  stroke: #78947a;
+  stroke-width: 34px;
+}
+.road-fill {
+  stroke: #d7e3cc;
+  stroke-width: 29px;
+}
+.road-dashes {
+  stroke: #fbfaf3;
+  stroke-width: 3px;
+  stroke-dasharray: 5 12;
+}
+.map-garden {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  right: 40px;
+  bottom: 26px;
+  width: 150px;
+  height: 150px;
+}
+.journey-map .map-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 142px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 72%;
+  max-width: 650px;
+  padding: 24px;
+  border-radius: 26px;
+  background: #fffefa;
+  box-shadow: 0 10px 28px #3e533b0c;
+}
+.journey-map .stage-2 {
+  justify-self: end;
+}
+.journey-map .map-stage .pathway-art {
+  background: transparent;
+  width: 142px;
+  height: 170px;
+  margin: 0;
+}
+.journey-map .stage-art {
+  width: 100%;
+  height: 142px;
+}
+.stage-pin {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  top: 22px;
+  left: -20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid #fffefa;
+  background: #64866a;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px #26352b15;
+}
+.journey-map .stage-2 .stage-pin {
+  left: auto;
+  right: -20px;
+}
+.stage-content {
+  min-width: 0;
+}
+.stage-content h3 {
+  margin: 6px 0 8px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+.stage-goal {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #526357;
+}
+.stage-content .pathway-count {
+  margin: 10px 0 8px;
+}
+.stage-content .pathway-count strong {
+  font-size: 25px;
+}
+.stage-content .pathway-count span {
+  font-size: 12px;
+}
+.stage-content .pathway-status {
+  min-height: 0;
+  font-size: 13px;
+  margin: 10px 0 12px;
+}
+.stage-content button {
+  font-size: 15px;
+}
+.pathway-locked .stage-pin {
+  background: #768272;
+}
+.pathway-locked .stage-art {
+  opacity: 0.8;
+}
+.journey-milestone {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #f8f0dc;
+  border-radius: 20px;
+  padding: 12px 20px;
+  margin: 18px 0;
+}
+.milestone-art {
+  width: 90px;
+  height: 90px;
+  flex: 0 0 90px;
+}
+.journey-milestone p {
+  margin: 6px 0 0;
+  color: #526357;
+  line-height: 1.5;
+}
+.score-explanation {
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin: 16px 0 24px;
+  color: #526357;
+  background: #f0f3eb;
+  font-size: 14px;
+}
+.score-explanation summary {
+  cursor: pointer;
+  min-height: 24px;
+}
+.score-explanation p {
+  line-height: 1.7;
+  margin: 12px 0 0;
+}
+.auth-sticker {
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 8px;
+}
+.welcome-illustration .welcome-art {
+  width: 220px;
+  height: 220px;
+}
+.learning-cue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 12px;
+}
+.learning-cue .cue-buddy {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+}
+.learning-cue h2 {
+  margin: 0;
+}
+.completion .completion-sticker {
+  width: 156px;
+  height: 156px;
+  margin: 0 auto 12px;
+}
+.lesson-video video {
+  background: #26352b;
+}
+.lesson-video .video-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.video-heading .illustration {
+  width: 48px;
+  height: 48px;
+}
+.video-heading h3 {
+  margin: 0;
+}
+.lesson-cover-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: #f0f3e8;
+  border-radius: 20px;
+}
+.lesson-cover-banner img {
+  width: 136px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.lesson-cover-banner h2 {
+  margin-bottom: 6px;
+}
+.lesson-cover-banner p {
+  margin: 0;
+  line-height: 1.6;
+}
+@media (max-width: 1150px) {
+  .illustrated-intro {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .illustrated-intro > .button-row {
+    flex-direction: row;
+  }
+  .journey-map .map-stage {
+    width: 85%;
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+  .journey-map .map-stage .pathway-art {
+    width: 112px;
+    height: 140px;
+  }
+}
+@media (max-width: 680px) {
+  .illustrated-intro {
+    padding: 16px;
+    border-radius: 20px;
+  }
+  .journey-greeting {
+    gap: 10px;
+  }
+  .greeting-buddy {
+    width: 70px;
+    height: 88px;
+    flex-basis: 70px;
+  }
+  .journey-greeting h2 {
+    font-size: 22px;
+  }
+  .journey-greeting p {
+    font-size: 14px;
+  }
+  .journey-greeting .eyebrow {
+    font-size: 10px;
+  }
+  .illustrated-intro > .button-row {
+    margin-top: 16px;
+  }
+  .journey-map {
+    gap: 38px;
+    padding: 24px 12px 26px 32px;
+    border-radius: 24px;
+    background-size: cover;
+  }
+  .journey-road {
+    display: none;
+  }
+  .journey-map::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 52px;
+    bottom: 52px;
+    left: 24px;
+    width: 12px;
+    border: 2px solid #8da184;
+    border-radius: 12px;
+    background: repeating-linear-gradient(
+      to bottom,
+      #dce7d0 0 13px,
+      #fffefa 13px 18px
+    );
+  }
+  .journey-map .map-stage {
+    width: 100%;
+    max-width: none;
+    display: block;
+    padding: 16px 18px 18px;
+    border-radius: 20px;
+  }
+  .journey-map .map-stage .pathway-art {
+    width: 100%;
+    height: 146px;
+    margin: -6px 0 8px;
+  }
+  .journey-map .stage-art {
+    max-width: 180px;
+    height: 146px;
+    margin: auto;
+  }
+  .journey-map .stage-pin,
+  .journey-map .stage-2 .stage-pin {
+    left: -22px;
+    right: auto;
+    top: 28px;
+    width: 38px;
+    height: 38px;
+  }
+  .stage-content h3 {
+    font-size: 21px;
+  }
+  .stage-content .stage-goal {
+    font-size: 14px;
+  }
+  .stage-content .pathway-count {
+    flex-wrap: wrap;
+  }
+  .map-garden {
+    display: none;
+  }
+  .score-explanation {
+    padding: 14px;
+  }
+  .journey-milestone {
+    padding: 12px;
+    gap: 12px;
+  }
+  .milestone-art {
+    width: 66px;
+    height: 80px;
+    flex-basis: 66px;
+  }
+  .journey-milestone p {
+    font-size: 14px;
+  }
+  .learning-cue {
+    gap: 8px;
+  }
+  .learning-cue .cue-buddy {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+  .lesson-cover-banner {
+    gap: 12px;
+  }
+  .lesson-cover-banner img {
+    width: 84px;
+    height: 80px;
+  }
+  .lesson-cover-banner h2 {
+    font-size: 18px;
+  }
+  .lesson-cover-banner p {
+    font-size: 14px;
+  }
+}
+@media print {
+  .journey-road,
+  .map-garden,
+  .greeting-buddy {
+    display: none;
+  }
+  .journey-map {
+    background: white;
+  }
+}

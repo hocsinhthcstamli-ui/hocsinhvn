@@ -1,0 +1,29 @@
+{
+  "name": "aac-learning",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "seed:phase4": "node scripts/seed-phase4.mjs",
+    "seed:phase3": "node scripts/seed-phase3.mjs",
+    "seed:phase2": "node scripts/seed-phase2.mjs",
+    "seed:phase1": "node scripts/seed-phase1.mjs",
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test tests/server.test.mjs tests/speech.test.mjs tests/pathways.test.mjs tests/curriculum.test.mjs tests/youtube.test.mjs tests/phase4.test.mjs tests/drive.test.mjs",
+    "test:ui": "playwright test",
+    "db:check": "node --env-file-if-exists=.env scripts/check-database.mjs",
+    "db:migrate": "node --env-file-if-exists=.env scripts/migrate-supabase.mjs",
+    "test:postgres": "node --test tests/postgres.test.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "embedded-postgres": "^18.4.0-beta.17",
+    "prettier": "^3.9.9"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
+}

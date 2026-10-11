@@ -1,0 +1,74 @@
+[
+  {
+    "source": "anh\\Gemini_Generated_Image_aq3kceaq3kceaq3k.png",
+    "output": "assets\\art\\stage-1.webp",
+    "bytes": 41158,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_k1x01pk1x01pk1x0.png",
+    "output": "assets\\art\\stage-2.webp",
+    "bytes": 32126,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_zflj0azflj0azflj.png",
+    "output": "assets\\art\\stage-3.webp",
+    "bytes": 42998,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_rkef95rkef95rkef.png",
+    "output": "assets\\art\\buddy-welcome.webp",
+    "bytes": 15984,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_pzkftopzkftopzkf.png",
+    "output": "assets\\art\\buddy-growing.webp",
+    "bytes": 16646,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_yygmaryygmaryygm.png",
+    "output": "assets\\art\\buddy-success.webp",
+    "bytes": 18728,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_q3rmqtq3rmqtq3rm.png",
+    "output": "assets\\art\\badge-start.webp",
+    "bytes": 8646,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_sfyo2qsfyo2qsfyo.png",
+    "output": "assets\\art\\badge-connect.webp",
+    "bytes": 8150,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_7fgzgb7fgzgb7fgz.png",
+    "output": "assets\\art\\badge-independent.webp",
+    "bytes": 6636,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_wnv5z0wnv5z0wnv5.png",
+    "output": "assets\\art\\garden.webp",
+    "bytes": 19348,
+    "transparent": true
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_bj3892bj3892bj38.png",
+    "output": "assets\\art\\journey-background.webp",
+    "bytes": 12164,
+    "transparent": false
+  },
+  {
+    "source": "anh\\Gemini_Generated_Image_nh1k9lnh1k9lnh1k.png",
+    "output": "assets\\art\\lesson-cover.webp",
+    "bytes": 28658,
+    "transparent": false
+  }
+]
