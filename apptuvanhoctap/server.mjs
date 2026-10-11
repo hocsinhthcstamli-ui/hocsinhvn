@@ -1,4 +1,7 @@
+import {funKinds,validateFun} from './fun-model.mjs';
 import { initialTemplates } from "./teacher-journeys.mjs";
+import {addMathContent,mathQuestions} from './content/math-journey.mjs';
+import {addComputerContent,computerQuestions} from './content/computer-journey.mjs';
 import { puzzlePacks } from "./puzzle-catalog.mjs";
 import { puzzleFiles } from "./puzzle-catalog.mjs";
 import { addTopicContent } from "./content/topic-journeys.mjs";
@@ -224,15 +227,15 @@ function recordValue(value) {
 function planValue(value, lessons, allowScores = true) {
   if (!value || !Array.isArray(value.stages) || value.stages.length !== 3)
     fail("Mỗi lộ trình cần đúng 3 đích đến.");
-  if (value.journeyId && !(/^(life|animals|vehicles|custom-[a-f0-9-]{36})$/).test(value.journeyId)) fail("Invalid journey.");
-  if(value.kind !== undefined && !['life','animals','vehicles'].includes(value.kind))fail('Loại lộ trình không hợp lệ.');
+  if (value.journeyId && !(/^(life|animals|vehicles|math|computer|custom-[a-f0-9-]{36})$/).test(value.journeyId)) fail("Invalid journey.");
+  if(value.kind !== undefined && !['life','animals','vehicles','math','computer'].includes(value.kind))fail('Loại lộ trình không hợp lệ.');
   if(value.archived !== undefined && typeof value.archived !== 'boolean')fail('Trạng thái lộ trình không hợp lệ.');
   return {
     childId: str(value.childId, "Học sinh", 100),
     ...(value.journeyId ? { journeyId: value.journeyId } : {}),
     ...(value.title !== undefined ? { title: str(value.title, "Title", 150) } : {}),
     ...(value.description !== undefined ? { description: str(value.description, "Description", 1500, false) } : {}),
-    ...(value.kind !== undefined ? {kind: ["life","animals","vehicles"].includes(value.kind) ? value.kind : "life"} : {}),
+    ...(value.kind !== undefined ? {kind:value.kind} : {}),
     ...(value.archived ? {archived: true} : {}),
     stages: value.stages.map((stage, index) => {
       if (
@@ -271,12 +274,12 @@ function planValue(value, lessons, allowScores = true) {
 function templateValue(value, lessons) {
   str(value.id,'Mã mẫu',100);
   const plan = planValue({...value, childId:'template',journeyId:value.id},lessons,false);
-  if(!['life','animals','vehicles'].includes(value.kind))fail('Loại bộ mẫu không hợp lệ.');
+  if(!['life','animals','vehicles','math','computer'].includes(value.kind))fail('Loại bộ mẫu không hợp lệ.');
   return {id:plan.journeyId,title:str(value.title,'Tên mẫu',150),description:str(value.description||'','Mô tả',1500,false),kind:value.kind,stages:plan.stages};
 }
 function activityValue(value) {
-  if(!['puzzle','sentences','video'].includes(value.kind))fail('Loại hoạt động không hợp lệ.');
-  const total=value.kind==='puzzle'?4:5;
+  if(!['puzzle','sentences','video','math','computer',...Object.keys(funKinds)].includes(value.kind))fail('Loại hoạt động không hợp lệ.');
+  const total=funKinds[value.kind]?integer(value.total,'Số nhiệm vụ',2,8):value.kind==='puzzle'?4:5;
   if(value.total!==total || value.completed!==total)fail('Hoạt động chưa hoàn thành.');
   if(!Number.isFinite(Date.parse(str(value.at,'Thời gian',50))))fail('Thời gian không hợp lệ.');
   return {id:str(value.id,'Mã lượt',100),childId:str(value.childId,'Học sinh',100),journeyId:str(value.journeyId,'Lộ trình',100),itemId:str(value.itemId,'Bài / tranh',100),label:str(value.label,'Tên hoạt động',150),kind:value.kind,total,completed:total,mistakes:integer(value.mistakes,'Số lần thử chưa khớp',0,10000),at:value.at,authorId:str(value.authorId,'Người ghi',100)};
@@ -367,6 +370,15 @@ export function validateBackup(input) {
     if (clean.activityResults.some(r=>!childIds.has(r.childId))) fail("Unknown activity learner.");
     if (new Set(clean.activityResults.map(r=>r.id)).size !== clean.activityResults.length) fail("Duplicate activity IDs.");
   }
+  if(d.contentImports!==undefined){
+    if(!Array.isArray(d.contentImports)||d.contentImports.length>100)fail('Invalid content imports.');
+    clean.contentImports=d.contentImports.map(v=>str(v,'Content import',100));
+  }
+  if(d.funActivities!==undefined){
+    if(!Array.isArray(d.funActivities)||d.funActivities.length>200)fail("Too many activities.");
+    clean.funActivities=d.funActivities.map(v=>{try{return {...validateFun(v),id:str(v.id,"Activity ID",100)};}catch(e){fail(e.message);}});
+    if(new Set(clean.funActivities.map(v=>v.id)).size!==clean.funActivities.length)fail("Duplicate activity IDs.");
+  }
   return clean;
 }
 
@@ -443,6 +455,8 @@ export async function createApp({
       }
       changed = addTopicContent(migrated) || changed;
       if (!migrated.journeyTemplates) { migrated.journeyTemplates = initialTemplates(migrated.lessons); changed = true; }
+      changed = addMathContent(migrated) || changed;
+      changed = addComputerContent(migrated) || changed;
       if (changed) {
         validateBackup(migrated);
         await db.prepare("UPDATE app_state SET data=?,version=version+1 WHERE id=1").run(JSON.stringify(migrated));
@@ -480,6 +494,7 @@ export async function createApp({
     result.data.learningPlans = result.data.learningPlans.filter(
       (p) => user.role !== "admin" && canChild(user, p.childId) && (user.role !== "child" || !p.archived),
     );
+    if(result.data.funActivities)result.data.funActivities=result.data.funActivities.filter(a=>result.data.learningPlans.some(p=>!p.archived&&(p.journeyId||"life")===a.journeyId));
     if (user.role !== "admin") {
       result.data.children = result.data.children.filter((c) =>
         canChild(user, c.id),
@@ -607,6 +622,12 @@ export async function createApp({
     return result;
   }
   const staticFiles = new Map([
+    ["/fun-model.mjs","fun-model.mjs"],
+    ["/fun-activities.mjs","fun-activities.mjs"],
+    ['/computer-art.mjs','computer-art.mjs'],
+    ['/content/computer-journey.mjs','content/computer-journey.mjs'],
+    ['/math-art.mjs','math-art.mjs'],
+    ['/content/math-journey.mjs','content/math-journey.mjs'],
     ...Object.values(cardPictures).map((file) => [file, file.slice(1)]),
     ...Object.values(voiceClips).map((file) => [file, file.slice(1)]),
     ["/card-art.mjs", "card-art.mjs"],
@@ -667,7 +688,7 @@ export async function createApp({
     res.setHeader("X-Frame-Options", "DENY");
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-src https://www.youtube-nocookie.com https://drive.google.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+      "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' data:; frame-src https://www.youtube-nocookie.com https://drive.google.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
     );
     try {
       const url = new URL(req.url, "http://localhost");
@@ -996,13 +1017,28 @@ export async function createApp({
             const plan=d.learningPlans.find(p=>p.childId===v.childId&&(p.journeyId||"life")===v.journeyId);
             if(!plan)fail("Plan not found.",404);
             plan.archived = true;
+          } else if (action === "saveFun" || action === "deleteFun") {
+            requireRole(user,"teacher");
+            if(!d.learningPlans.some(p=>canChild(user,p.childId)&&!p.archived&&(p.journeyId||"life")===v.journeyId))fail("Journey unavailable.",403);
+            const activities=d.funActivities ||= [];
+            const old=activities.find(a=>a.id===v.id);
+            if(v.id&&(!old||old.journeyId!==v.journeyId))fail("Activity not found.",404);
+            if(action==="deleteFun")d.funActivities=activities.filter(a=>a.id!==v.id);
+            else {
+              let activity;try{activity=validateFun({...v,id:old?.id||randomUUID()});}catch(e){fail(e.message);}
+              if(old)activities[activities.indexOf(old)]=activity;
+              else {if(activities.length>=200)fail("Activity limit reached.");activities.push(activity);}
+            }
           } else if (action === "activityResult") {
             requireRole(user,"teacher","parent","child"); child(v.childId);
             const plan=d.learningPlans.find(p=>p.childId===v.childId&&(p.journeyId||"life")===v.journeyId&&!p.archived);
             if(!plan)fail("Plan unavailable.",403);
-            const item=v.kind==="puzzle" ? puzzlePacks[plan.kind||v.journeyId]?.find(p=>p.id===v.itemId) : d.lessons.find(l=>l.id===v.itemId);
+            const item=funKinds[v.kind] ? (d.funActivities||[]).find(a=>a.id===v.itemId&&a.journeyId===v.journeyId&&a.kind===v.kind) : v.kind==="puzzle" ? puzzlePacks[plan.kind||v.journeyId]?.find(p=>p.id===v.itemId) : d.lessons.find(l=>l.id===v.itemId);
             if(!item)fail("Activity unavailable.");
-            if(v.kind!=="puzzle" && !availableLessonIds(plan).includes(v.itemId))fail("Lesson locked.",403);
+            if(v.kind==='math'&&!mathQuestions[v.itemId])fail('Math activity unavailable.');
+            if(v.kind==='computer'&&!computerQuestions[v.itemId])fail('Computer activity unavailable.');
+            if(funKinds[v.kind] && v.total!==item.items.length)fail("Invalid activity total.");
+            if(!funKinds[v.kind] && v.kind!=="puzzle" && !availableLessonIds(plan).includes(v.itemId))fail("Lesson locked.",403);
             const record=activityValue({...v,authorId:user.id,at:new Date().toISOString(),label:item.title});
             const results=d.activityResults ||= [];
             if(!results.some(r=>r.id===record.id)) {

@@ -1,3 +1,5 @@
+import './fun-activities.mjs';
+import {funKinds} from './fun-model.mjs';
 import { templateLibrary, teacherProgress } from "./teacher-journeys.mjs";
 import { puzzlePacks } from "./puzzle-catalog.mjs";
 import { activityMarkup } from "./lesson-activities.mjs";
@@ -77,10 +79,10 @@ const topicChooser = () => {
 const childJourneys = () => assignedJourneys(data.learningPlans.filter(p=>p.childId===childId));
 const puzzleKind = () => currentPlan()?.kind || selectedJourney;
 const plansView = () => {
-  if (puzzleOpen && puzzlePacks[puzzleKind()]) return `<button class="text-button" data-action="closePuzzle">← Về lộ trình ${childJourneys().find(j => j.id === selectedJourney).number}</button><picture-puzzle journey="${puzzleKind()}"></picture-puzzle>`;
+  if (puzzleOpen) return `<button class="text-button" data-action="closePuzzle">← Về lộ trình</button><fun-activities data-content="${esc(JSON.stringify({teacher:manager(),journeyId:selectedJourney,pack:puzzleKind(),activities:(data.funActivities||[]).filter(a=>a.journeyId===selectedJourney)}))}"></fun-activities>`;
   if (!selectedJourney) return (manager() ? templateLibrary(data.journeyTemplates || []) : "") + journeyChooser(data.learningPlans.filter(p => p.childId === childId), currentChild()?.name || "con") + (manager() ? teacherProgress(data,childId) : "");
   if (!childJourneys().find(j => j.id === selectedJourney)?.ready) return journeyPreview(selectedJourney);
-  return backToJourneys + (manager() ? `<div class="button-row"><button class="secondary" data-action="viewJourneyResults">Xem k?t qu? th?c h?nh</button><button class="text-button" data-action="unassignJourney">G? l? tr?nh kh?i m?n h?c</button></div>` : "") + (puzzlePacks[puzzleKind()] ? `<section class="puzzle-entry"><img src="/assets/art/sticker-explore.webp" alt=""><div><h3>Ghép ảnh 4 mảnh</h3><p>${puzzlePacks[puzzleKind()].length} bức tranh · Kéo, thả và khám phá</p><button class="primary" data-action="openPuzzle">Chơi ghép ảnh</button></div></section>` : "") + (manager() ? (selectedJourney === "life" ? curriculumChooser(data.lessons) : ["animals","vehicles"].includes(selectedJourney) ? topicChooser() : "") : "") + pathwayView(
+  return backToJourneys + (manager() ? `<div class="button-row"><button class="secondary" data-action="viewJourneyResults">Xem kết quả thực hành</button><button class="text-button" data-action="unassignJourney">Gỡ lộ trình khỏi màn học</button></div>` : "") + (puzzlePacks[puzzleKind()] ? `<section class="puzzle-entry"><img src="/assets/art/sticker-explore.webp" alt=""><div><h3>Hoạt động vui vẻ</h3><p>${puzzlePacks[puzzleKind()].length} bức tranh · Kéo, thả và khám phá</p><button class="primary" data-action="openPuzzle">Chọn hoạt động</button></div></section>` : "") + (manager() ? (selectedJourney === "life" ? curriculumChooser(data.lessons) : ["animals","vehicles"].includes(selectedJourney) ? topicChooser() : "") : "") + pathwayView(
     currentPlan(),
     data.lessons,
     manager(),
@@ -886,7 +888,7 @@ function migrateLegacy(old) {
   };
 }
 function showTemplateEditor(template) {
-  const form=planEditor(template,data.lessons).replace('data-form="plan"','data-form="template"').replace('<p class="hint">',`<label>Tên lộ trình mẫu<input name="templateTitle" required maxlength="150" value="${esc(template.title)}"></label><label>Mô tả<textarea name="templateDescription" maxlength="1500">${esc(template.description)}</textarea></label><label>Bộ ảnh và trò chơi<select name="templateKind">${['life','animals','vehicles'].map(id=>option(id,journeyCatalog.find(j=>j.id===id).title,template.kind)).join('')}</select></label><p class="hint">`).replace('Lưu lộ trình của bé','Lưu bộ mẫu');
+  const form=planEditor(template,data.lessons).replace('data-form="plan"','data-form="template"').replace('<p class="hint">',`<label>Tên lộ trình mẫu<input name="templateTitle" required maxlength="150" value="${esc(template.title)}"></label><label>Mô tả<textarea name="templateDescription" maxlength="1500">${esc(template.description)}</textarea></label><label>Bộ ảnh và trò chơi<select name="templateKind">${['life','animals','vehicles','math','computer'].map(id=>option(id,journeyCatalog.find(j=>j.id===id).title,template.kind)).join('')}</select></label><p class="hint">`).replace('Lưu lộ trình của bé','Lưu bộ mẫu');
   openModal(template.id?'Sửa lộ trình mẫu':'Tạo lộ trình mẫu',form);
 }
 const actions = {
@@ -1516,7 +1518,7 @@ let resultQueue=Promise.resolve();
 document.addEventListener('learning-result',event=>{
   if(!user||!childId||user.role==='admin')return;
   const itemId=event.detail.itemId||lessonId;
-  const plan=event.detail.kind==='puzzle'?currentPlan():data.learningPlans.find(p=>p.childId===childId&&!p.archived&&(p.journeyId||'life')===selectedJourney&&availableLessonIds(p).includes(itemId))||data.learningPlans.find(p=>p.childId===childId&&!p.archived&&availableLessonIds(p).includes(itemId));
+  const plan=(event.detail.kind==='puzzle'||funKinds[event.detail.kind])?currentPlan():data.learningPlans.find(p=>p.childId===childId&&!p.archived&&(p.journeyId||'life')===selectedJourney&&availableLessonIds(p).includes(itemId))||data.learningPlans.find(p=>p.childId===childId&&!p.archived&&availableLessonIds(p).includes(itemId));
   if(!plan)return;
   const actor=user.id,payload={...event.detail,id:crypto.randomUUID(),childId,itemId,journeyId:plan.journeyId||'life'};
   const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Đang lưu kết quả…';event.target.append(status);
@@ -1530,4 +1532,21 @@ document.addEventListener('learning-result',event=>{
     }catch(error){status.textContent='Chưa lưu được kết quả. ';const retry=document.createElement('button');retry.className='secondary';retry.textContent='Thử lưu lại';retry.onclick=()=>{retry.disabled=true;resultQueue=resultQueue.then(save);};status.append(retry);}
   };
   resultQueue=resultQueue.then(save);
+});
+
+document.addEventListener('fun-save',async event=>{
+  const {action,payload,resolve,reject}=event.detail;
+  const original=(data.funActivities||[]).find(a=>a.id===payload.id);
+  try{
+    let result;
+    try{result=await api('/api/action',{action,payload,version});}
+    catch(error){
+      if(error.status!==409)throw error;
+      const latest=await api('/api/state');
+      const current=(latest.data.funActivities||[]).find(a=>a.id===payload.id);
+      if(payload.id&&JSON.stringify(current)!==JSON.stringify(original))throw Error('Hoạt động đã được người khác thay đổi. Quay lại danh sách và mở bản mới trước khi sửa.');
+      accept(latest);result=await api('/api/action',{action,payload,version});
+    }
+    accept(result);render();resolve();
+  }catch(error){reject(error);}
 });

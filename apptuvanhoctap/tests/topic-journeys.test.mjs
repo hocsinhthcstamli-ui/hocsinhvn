@@ -12,6 +12,150 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { topicVideos, attachTopicVideos } from "../content/topic-videos.mjs";
 import { youtubeValue } from "../youtube.mjs";
+import {addMathContent,mathLessons,mathQuestions,mathTemplate} from '../content/math-journey.mjs';
+import {activitiesFor} from '../lesson-activities.mjs';
+import {puzzlePacks} from '../puzzle-catalog.mjs';
+import {computerLessons,computerQuestions,computerTemplate,addComputerContent} from '../content/computer-journey.mjs';
+import {validateFun} from '../fun-model.mjs';
+import {lifeFunDefinitions} from '../content/life-fun.mjs';
+import {materializeLifeFun,mergeLifeFun} from '../scripts/seed-life-fun.mjs';
+import {materializeAnimalsFun,mergeAnimalsFun} from '../scripts/seed-animals-fun.mjs';
+import {materializeVehiclesFun,mergeVehiclesFun} from '../scripts/seed-vehicles-fun.mjs';
+import {materializeMathFun,mergeMathFun} from '../scripts/seed-math-fun.mjs';
+import {mathFunDefinitions} from '../content/math-fun.mjs';
+import {materializeComputerFun,mergeComputerFun} from '../scripts/seed-computer-fun.mjs';
+
+test('Computer pack completes 100 demo activities, preserves older packs and allows teacher additions',async()=>{
+  const data=seedData();mergeLifeFun(data,await materializeLifeFun());mergeAnimalsFun(data,await materializeAnimalsFun());mergeVehiclesFun(data,await materializeVehiclesFun());mergeMathFun(data,await materializeMathFun());
+  const before=structuredClone(data),activities=await materializeComputerFun();
+  for(const kind of ['listen','sequence','sort','pairs'])assert.equal(activities.filter(a=>a.kind===kind).length,5);
+  for(const a of activities){assert.equal(a.journeyId,'computer');assert.deepEqual(validateFun(a),a);assert.equal(a.items.length,a.kind==='sequence'?3:4);}
+  assert.equal(mergeComputerFun(data,activities),20);
+  assert.deepEqual(data.funActivities.filter(a=>a.journeyId!=='computer'),before.funActivities);
+  assert.deepEqual(data.lessons,before.lessons);assert.deepEqual(data.learningPlans,before.learningPlans);
+  assert.equal(data.funActivities.length,100);
+  data.funActivities.push({...structuredClone(activities[0]),id:'teacher-extra'});
+  assert.equal(validateBackup(data).funActivities.length,101);
+  data.funActivities.find(a=>a.journeyId==='computer').title='Teacher edit';data.funActivities.splice(99,1);
+  const restored=validateBackup(data);assert.equal(mergeComputerFun(restored,activities),0);
+  assert.equal(restored.funActivities.length,100);assert.equal(restored.funActivities.find(a=>a.journeyId==='computer').title,'Teacher edit');
+});
+
+test('Math activity pack has exact numerical sequences and preserves the three previous packs',async()=>{
+  const data=seedData();mergeLifeFun(data,await materializeLifeFun());mergeAnimalsFun(data,await materializeAnimalsFun());mergeVehiclesFun(data,await materializeVehiclesFun());
+  const before=structuredClone(data),activities=await materializeMathFun();
+  for(const kind of ['listen','sequence','sort','pairs'])assert.equal(activities.filter(a=>a.kind===kind).length,5);
+  for(const a of activities){assert.equal(a.journeyId,'math');assert.deepEqual(validateFun(a),a);assert.equal(a.items.length,a.kind==='sequence'?3:4);}
+  const counts=mathFunDefinitions.filter(a=>a.kind==='sequence').slice(0,4).map(a=>a.items.map(i=>Number(i.picture.match(/count-(\d)/)[1])));
+  assert.deepEqual(counts,[[1,2,3],[6,5,4],[1,3,5],[2,4,6]]);
+  assert.equal(mergeMathFun(data,activities),20);
+  assert.deepEqual(data.funActivities.filter(a=>a.journeyId!=='math'),before.funActivities);
+  assert.deepEqual(data.lessons,before.lessons);assert.deepEqual(data.learningPlans,before.learningPlans);
+  data.funActivities.find(a=>a.journeyId==='math').title='Teacher edit';data.funActivities.pop();
+  const restored=validateBackup(data);assert.equal(mergeMathFun(restored,activities),0);
+  assert.equal(restored.funActivities.length,79);assert.equal(restored.funActivities.find(a=>a.journeyId==='math').title,'Teacher edit');
+});
+
+test('Vehicles pack adds 20 valid activities and preserves both earlier packs and teacher edits',async()=>{
+  const data=seedData();mergeLifeFun(data,await materializeLifeFun());mergeAnimalsFun(data,await materializeAnimalsFun());
+  const before=structuredClone(data),activities=await materializeVehiclesFun();
+  for(const kind of ['listen','sequence','sort','pairs'])assert.equal(activities.filter(a=>a.kind===kind).length,5);
+  for(const a of activities){assert.equal(a.journeyId,'vehicles');assert.deepEqual(validateFun(a),a);assert.equal(a.items.length,a.kind==='sequence'?3:4);}
+  assert.equal(mergeVehiclesFun(data,activities),20);
+  assert.deepEqual(data.funActivities.filter(a=>a.journeyId!=='vehicles'),before.funActivities);
+  assert.deepEqual(data.lessons,before.lessons);assert.deepEqual(data.learningPlans,before.learningPlans);
+  data.funActivities.find(a=>a.journeyId==='vehicles').title='Teacher edit';data.funActivities.pop();
+  const restored=validateBackup(data);assert.equal(mergeVehiclesFun(restored,activities),0);
+  assert.equal(restored.funActivities.length,59);assert.equal(restored.funActivities.find(a=>a.journeyId==='vehicles').title,'Teacher edit');
+});
+
+test('Animals pack adds five per kind without changing life activities or teacher edits',async()=>{
+  const activities=await materializeAnimalsFun(),data=seedData();
+  mergeLifeFun(data,await materializeLifeFun());const before=structuredClone(data);
+  assert.equal(activities.length,20);
+  for(const kind of ['listen','sequence','sort','pairs'])assert.equal(activities.filter(a=>a.kind===kind).length,5);
+  for(const a of activities){assert.equal(a.journeyId,'animals');assert.deepEqual(validateFun(a),a);assert.equal(a.items.length,a.kind==='sequence'?3:4);}
+  assert.equal(mergeAnimalsFun(data,activities),20);
+  assert.deepEqual(data.funActivities.filter(a=>a.journeyId==='life'),before.funActivities);
+  assert.deepEqual(data.lessons,before.lessons);assert.deepEqual(data.learningPlans,before.learningPlans);
+  data.funActivities.find(a=>a.journeyId==='animals').title='Teacher edit';data.funActivities.pop();
+  const restored=validateBackup(data);assert.equal(mergeAnimalsFun(restored,activities),0);
+  assert.equal(restored.funActivities.length,39);assert.equal(restored.funActivities.find(a=>a.journeyId==='animals').title,'Teacher edit');
+});
+
+test('Life activity pack has five per kind, real media and preserves edits/deletions on repeat import',async()=>{
+  const activities=await materializeLifeFun();
+  assert.equal(activities.length,20);
+  for(const kind of ['listen','sequence','sort','pairs'])assert.equal(activities.filter(a=>a.kind===kind).length,5);
+  assert.equal(new Set(activities.map(a=>a.id)).size,20);
+  for(const a of activities){assert.equal(a.journeyId,'life');assert.deepEqual(validateFun(a),a);for(const item of a.items){assert.ok(item.image.length>100);if(a.kind==='listen')assert.ok(item.audio.length>1000);}}
+  assert.equal(lifeFunDefinitions.filter(a=>a.kind==='sequence').every(a=>a.items.length===3),true);
+  const data=seedData();const before=structuredClone(data);
+  assert.equal(mergeLifeFun(data,activities),20);
+  assert.deepEqual(data.lessons,before.lessons);assert.deepEqual(data.learningPlans,before.learningPlans);
+  data.funActivities[0].title='Teacher changed this';data.funActivities.pop();
+  const restored=validateBackup(data);assert.equal(mergeLifeFun(restored,activities),0);
+  assert.equal(restored.funActivities.length,19);assert.equal(restored.funActivities[0].title,'Teacher changed this');
+});
+
+test('Teacher activities validate media, categories and backup history without demo seeds',()=>{
+  const image='data:image/png;base64,AAAA';
+  const a={id:'test-activity',journeyId:'life',title:'Test',kind:'pairs',items:[{label:'One',image},{label:'Two',image}]};
+  assert.equal(validateFun(a).items.length,2);
+  assert.throws(()=>validateFun({...a,kind:'listen'}));
+  assert.throws(()=>validateFun({...a,kind:'sort',items:a.items.map(i=>({...i,group:'same'}))}));
+  assert.throws(()=>validateFun({...a,items:[{label:'One',image:'https://example.com/x.png'},a.items[1]]}));
+  assert.throws(()=>validateFun({...a,items:[a.items[0]]}));
+  const d=seedData();assert.equal(d.funActivities,undefined);d.funActivities=[a];
+  assert.deepEqual(validateBackup(d).funActivities,[validateFun(a)]);
+  assert.throws(()=>validateBackup({...d,funActivities:[a,a]}));
+});
+
+test('Computer curriculum has reviewed assets, five questions per lesson and preserves library deletions',()=>{
+  const data=seedData();addComputerContent(data);
+  assert.equal(computerLessons.length,6);assert.equal(puzzlePacks.computer.length,10);
+  assert.equal(new Set(puzzlePacks.computer.map(p=>p.id)).size,10);
+  assert.deepEqual(computerTemplate().stages.map(s=>s.lessonIds.length),[2,2,2]);
+  for(const lesson of computerLessons){
+    assert.equal(lesson.teachingGuide.band,'secondary');
+    assert.equal(lesson.teachingGuide.practice.length,5);
+    assert.equal(activitiesFor(lesson).kind,'computer');
+    assert.equal(activitiesFor(lesson).rounds.length,5);
+    assert.equal(computerQuestions[lesson.id].length,5);
+    for(const c of lesson.cards)assert.ok(cardImage(c));
+    for(const q of computerQuestions[lesson.id]){
+      assert.ok(q.choices.includes(q.answer));assert.equal(new Set(q.choices).size,q.choices.length);
+      for(const text of q.choices)assert.ok(voiceClips[text.toLowerCase().trim()],text);
+    }
+  }
+  assert.equal(data.learningPlans?.length||0,0);
+  data.lessons[0].title='Teacher edit';data.journeyTemplates=[];
+  const restored=validateBackup(data);assert.equal(addComputerContent(restored),false);
+  assert.equal(restored.journeyTemplates.length,0);assert.equal(restored.lessons[0].title,'Teacher edit');
+});
+
+test('Math library has six THCS lessons, thirty questions and ten puzzles; import preserves edits and deletions',()=>{
+  const d=seedData();addMathContent(d);
+  assert.equal(mathLessons.length,6);assert.equal(puzzlePacks.math.length,10);
+  assert.deepEqual(mathTemplate().stages.map(s=>s.lessonIds.length),[2,2,2]);
+  for(const l of mathLessons){
+    assert.equal(l.teachingGuide.band,'secondary');
+    assert.equal(activitiesFor(l).rounds.length,5);
+    assert.equal(mathQuestions[l.id].length,5);
+    for(const q of mathQuestions[l.id]){
+      assert.ok(q.choices.includes(q.answer));
+      assert.equal(new Set(q.choices).size,q.choices.length);
+      for(const choice of q.choices)assert.ok(voiceClips[choice.toLowerCase().trim()],choice);
+    }
+    for(const c of l.cards)assert.ok(cardImage(c));
+  }
+  assert.equal(d.learningPlans?.length||0,0);
+  d.journeyTemplates=[];d.lessons=d.lessons.filter(l=>l.id!==mathLessons[0].id);
+  const restored=validateBackup(d);
+  assert.equal(addMathContent(restored),false);
+  assert.equal(restored.journeyTemplates.length,0);
+  assert.ok(!restored.lessons.some(l=>l.id===mathLessons[0].id));
+});
 
 test("Topic video links match real lessons and never replace teacher changes or removals", () => {
   const data = { lessons: structuredClone(topicLessons) };

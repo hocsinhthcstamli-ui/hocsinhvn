@@ -4,6 +4,10 @@
 
 ## Cập nhật ứng dụng đang chạy
 
+Bản mới bổ sung lộ trình Toán và Máy tính: tổng 80 bài, 5 mẫu lộ trình. Khi khởi động, server nạp thêm hai mẫu; giáo viên chọn giao cho từng học sinh. Mục **Hoạt động vui vẻ** có ghép ảnh và bốn loại hoạt động do giáo viên quản lý.
+
+100 hoạt động mẫu (20 bài mỗi lộ trình) đã được nạp vào SQLite local bằng các script `scripts/seed-*-fun.mjs`. Mã nguồn, ảnh và âm thanh của bộ mẫu được đưa lên Git; **push Git không tự nhập 100 hoạt động này vào Supabase**. Các script nạp hiện dành cho SQLite, không chạy chúng trên ổ tạm Render. Khi cần đưa nội dung mẫu lên production, phải nhập bổ sung vào dữ liệu đang có, giữ bản sao lưu và các chỉnh sửa của giáo viên; không nhập đè database local.
+
 Bản cập nhật quản lý giáo viên tự bổ sung thư viện 3 mẫu lộ trình vào dữ liệu Supabase khi khởi động lần đầu. Các bản đã giao và điểm hiện có được giữ nguyên. Giáo viên tạo/sửa/xóa mẫu dùng chung rồi giao bản riêng cho từng học sinh; gỡ bản đã giao giữ lại lịch sử. Kết quả ghép ảnh, luyện 5 câu và câu hỏi video được lưu khi hoàn thành, tách khỏi điểm giáo viên. Không nhập đè SQLite local lên Supabase.
 
 40 tranh ghép (20 kỹ năng sống, 10 động vật, 10 xe cộ), giọng đọc và câu hỏi đi cùng mã nguồn. Không cần chạy SQL hoặc upload Storage. Chỉ các nguồn video đã có câu hỏi tương ứng mới hiện hoạt động video.

@@ -544,3 +544,9 @@
 .activity-feedback,.guided-feedback { min-height:2.5em; font-weight:600; }
 .guided-sentence { min-height:64px; padding:18px; margin-top:16px; border:2px solid #ccd8c8; border-radius:16px; background:white; font-size:1.15rem; }
 @media(max-width:600px) { .activity-options { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .activity-choice { padding:10px; font-size:1rem; } .activity-choice img { height:100px; } }
+.math-question-image { display:block; width:min(100%,320px); max-height:320px; object-fit:contain; margin:16px auto; border-radius:20px; }
+.fun-thumb {width:120px;height:120px;object-fit:contain;border-radius:12px;}
+fun-activities {display:block;}
+fun-activities fieldset {margin:16px 0;padding:16px;border:1px solid #64866a;border-radius:16px;min-width:0;}
+fun-activities audio {max-width:100%;}
+fun-activities [data-fun=group] {min-height:80px;border:2px dashed #64866a;}

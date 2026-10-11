@@ -1,6 +1,23 @@
 import { cardPictures } from "./card-art-manifest.mjs";
 const suppliedPictures = {};
 for (const [name, words] of [
+  ['computer-monitor',['màn hình']],
+  ['computer-devices',['máy tính']],
+  ['computer-mouse',['chuột máy tính']],
+  ['computer-keyboard',['bàn phím']],
+  ['computer-break',['nghỉ mắt']],
+  ['computer-typing',['gõ phím']],
+  ['computer-folder',['thư mục','lưu bài']],
+  ['computer-safe',['bảo vệ tài khoản']],
+  ['computer-help',['nhờ giáo viên']],
+  ['math-counting',['khối đếm']],
+  ['math-sharing',['chia đều']],
+  ['math-fractions',['một phần tư']],
+  ['math-shapes',['hình phẳng']],
+  ['math-solids',['hình khối']],
+  ['math-measuring',['đo độ dài','thước kẻ']],
+  ['math-shopping',['mua đồ dùng']],
+  ['math-clock',['xem giờ']],
   ["animal-cat", ["con mèo", "mèo"]],
   ["animal-rabbit", ["con thỏ", "thỏ"]],
   ["animal-hen", ["con gà", "gà", "gà mái"]],

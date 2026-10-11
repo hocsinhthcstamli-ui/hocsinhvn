@@ -1,0 +1,1 @@
+export const computerArtNames = ["journey-computer", "computer-devices", "computer-practice", "computer-break", "computer-mouse", "computer-keyboard", "computer-typing", "computer-help", "computer-folder", "computer-safe", "computer-monitor"];

@@ -11,7 +11,7 @@ test("Life puzzle: 20 images, drag/tap/keyboard, feedback, replay and no grade w
   const before = (await (await page.request.get('/api/state')).json()).data;
   const writes=[];
   page.on('request', r=>{if(r.method()==='POST')writes.push(r.url());});
-  await page.locator('[data-action=openPuzzle]').click();
+  await page.locator('[data-action=openPuzzle]').click();await page.locator('[data-fun=puzzle]').click();
   await expect(page.locator('.puzzle-choice')).toHaveCount(20);
   for (const picture of puzzlePacks.life) expect((await page.request.get(picture.src)).status()).toBe(200);
   for(let i=0;i<30;i++) expect(shuffledPieces()).not.toEqual([0,1,2,3]);
@@ -54,7 +54,7 @@ test("Life puzzle: 20 images, drag/tap/keyboard, feedback, replay and no grade w
   for (const journey of ['animals','vehicles']) {
     await page.locator(`[data-action=openJourney][data-id=${journey}]`).click();
     await expect(page.locator('.puzzle-entry')).toContainText('10 bức tranh');
-    await page.locator('[data-action=openPuzzle]').click();
+    await page.locator('[data-action=openPuzzle]').click();await page.locator('[data-fun=puzzle]').click();
     await expect(page.locator('.puzzle-choice')).toHaveCount(10);
     for(const picture of puzzlePacks[journey])expect((await page.request.get(picture.src)).status()).toBe(200);
     await page.locator('.puzzle-choice').first().click();

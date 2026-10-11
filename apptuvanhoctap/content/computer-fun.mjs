@@ -1,0 +1,23 @@
+const activity=(kind,n,title,items)=>({id:`computer-fun-${kind}-${n}`,journeyId:'computer',kind,title,items:items.map(v=>typeof v==='string'?{label:v}:{label:v[0],group:v[1]})});
+export const computerFunDefinitions=[
+  activity('listen',1,'Nghe tên thiết bị máy tính',['máy tính','màn hình','bàn phím','chuột máy tính']),
+  activity('listen',2,'Nghe thao tác và thói quen học',['gõ phím','lưu bài','nghỉ mắt','nhờ giáo viên']),
+  activity('listen',3,'Nghe hình ảnh trong góc học máy tính',['màn hình','thư mục','bảo vệ tài khoản','chuột máy tính']),
+  activity('listen',4,'Nghe lời giao tiếp khi dùng máy',['Con cần giúp','Con muốn nghỉ','Con chờ','Con xong rồi']),
+  activity('listen',5,'Nghe việc học và bảo vệ tài khoản',['bàn phím','gõ phím','bảo vệ tài khoản','nhờ giáo viên']),
+  activity('sequence',1,'Làm tài liệu: gõ, lưu rồi báo xong',['gõ phím','lưu bài','Con xong rồi']),
+  activity('sequence',2,'Giờ học mô phỏng: dùng chuột, gõ rồi lưu',['chuột máy tính','gõ phím','lưu bài']),
+  activity('sequence',3,'Mỏi mắt: xin nghỉ, lưu bài rồi nghỉ mắt',['Con muốn nghỉ','lưu bài','nghỉ mắt']),
+  activity('sequence',4,'Thông báo lạ: dừng, nhờ giáo viên rồi chờ',['Con dừng lại','nhờ giáo viên','Con chờ']),
+  activity('sequence',5,'Chưa biết thao tác: báo chưa biết, nhờ giúp rồi chờ',['Con chưa biết','Con cần giúp','Con chờ']),
+  activity('sort',1,'Thiết bị và hoạt động',[['chuột máy tính','Thiết bị'],['bàn phím','Thiết bị'],['gõ phím','Hoạt động'],['nghỉ mắt','Hoạt động']]),
+  activity('sort',2,'Làm bài và nhờ hỗ trợ',[['gõ phím','Làm bài'],['lưu bài','Làm bài'],['nhờ giáo viên','Nhờ hỗ trợ'],['Con cần giúp','Nhờ hỗ trợ']]),
+  activity('sort',3,'Thiết bị và biểu tượng số',[['màn hình','Thiết bị'],['bàn phím','Thiết bị'],['thư mục','Biểu tượng số'],['bảo vệ tài khoản','Biểu tượng số']]),
+  activity('sort',4,'Thao tác bài làm và nghỉ ngơi',[['gõ phím','Thao tác bài làm'],['lưu bài','Thao tác bài làm'],['nghỉ mắt','Nghỉ ngơi'],['Con muốn nghỉ','Nghỉ ngơi']]),
+  activity('sort',5,'Thiết bị và lời giao tiếp',[['máy tính','Thiết bị'],['màn hình','Thiết bị'],['Con cần giúp','Lời giao tiếp'],['Con muốn nghỉ','Lời giao tiếp']]),
+  activity('pairs',1,'Tìm cặp thiết bị',['máy tính','màn hình','bàn phím','chuột máy tính']),
+  activity('pairs',2,'Tìm cặp hoạt động học',['gõ phím','lưu bài','nghỉ mắt','nhờ giáo viên']),
+  activity('pairs',3,'Tìm cặp hình ảnh công nghệ',['màn hình','thư mục','bảo vệ tài khoản','chuột máy tính']),
+  activity('pairs',4,'Tìm cặp lời giao tiếp',['Con cần giúp','Con muốn nghỉ','Con chờ','Con xong rồi']),
+  activity('pairs',5,'Tìm cặp học và bảo vệ tài khoản',['bàn phím','gõ phím','bảo vệ tài khoản','nhờ giáo viên']),
+];

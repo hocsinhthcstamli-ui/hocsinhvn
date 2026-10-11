@@ -1,0 +1,23 @@
+const activity=(kind,n,title,items)=>({id:`vehicles-fun-${kind}-${n}`,journeyId:'vehicles',kind,title,items:items.map(v=>typeof v==='string'?{label:v}:{label:v[0],group:v[1]})});
+export const vehiclesFunDefinitions=[
+  activity('listen',1,'Nghe tên xe trên đường',['ô tô','xe máy','xe buýt','xe cứu thương']),
+  activity('listen',2,'Nghe phương tiện của những chuyến đi',['thuyền','trực thăng','tàu điện','xe buýt']),
+  activity('listen',3,'Nghe và phân biệt các phương tiện',['ô tô','thuyền','trực thăng','tàu điện']),
+  activity('listen',4,'Nghe việc chuẩn bị đi xe',['đội mũ bảo hiểm','thắt dây an toàn','Con chờ','Con cần giúp']),
+  activity('listen',5,'Nghe lời nhờ hỗ trợ khi đi cùng người lớn',['Con dừng lại','đi cùng con','Con muốn nghỉ','Con cần giúp']),
+  activity('sequence',1,'Đi xe máy: đội mũ, nhờ kiểm tra rồi chờ người lớn',['đội mũ bảo hiểm','Con cần giúp','Con chờ']),
+  activity('sequence',2,'Ngồi ô tô: cài dây, nhờ kiểm tra rồi báo xong',['thắt dây an toàn','Con cần giúp','Con xong rồi']),
+  activity('sequence',3,'Trước đường giả: dừng, nhờ đi cùng rồi chờ',['Con dừng lại','đi cùng con','Con chờ']),
+  activity('sequence',4,'Chuyến đi mô phỏng: chọn xe buýt rồi nhờ đi cùng',['Con chọn','xe buýt','đi cùng con']),
+  activity('sequence',5,'Mệt trên chuyến đi: xin nghỉ, nhờ giúp và chờ',['Con muốn nghỉ','Con cần giúp','Con chờ']),
+  activity('sort',1,'Đường bộ và đường thủy',[['ô tô','Đường bộ'],['xe buýt','Đường bộ'],['xe máy','Đường bộ'],['thuyền','Đường thủy']]),
+  activity('sort',2,'Đường bộ và đường sắt',[['ô tô','Đường bộ'],['xe máy','Đường bộ'],['xe buýt','Đường bộ'],['tàu điện','Đường sắt']]),
+  activity('sort',3,'Đường bộ và đường hàng không',[['ô tô','Đường bộ'],['xe buýt','Đường bộ'],['xe cứu thương','Đường bộ'],['trực thăng','Đường hàng không']]),
+  activity('sort',4,'Phương tiện và việc bảo vệ khi đi xe',[['ô tô','Phương tiện'],['xe máy','Phương tiện'],['đội mũ bảo hiểm','Việc bảo vệ'],['thắt dây an toàn','Việc bảo vệ']]),
+  activity('sort',5,'Phương tiện và lời nhờ hỗ trợ',[['xe buýt','Phương tiện'],['tàu điện','Phương tiện'],['đi cùng con','Lời nhờ hỗ trợ'],['Con cần giúp','Lời nhờ hỗ trợ']]),
+  activity('pairs',1,'Tìm cặp xe quen thuộc',['ô tô','xe máy','xe buýt','xe cứu thương']),
+  activity('pairs',2,'Tìm cặp phương tiện những chuyến đi',['thuyền','trực thăng','tàu điện','xe buýt']),
+  activity('pairs',3,'Tìm cặp phương tiện khác nhau',['ô tô','thuyền','trực thăng','tàu điện']),
+  activity('pairs',4,'Tìm cặp việc chuẩn bị đi xe',['đội mũ bảo hiểm','thắt dây an toàn','Con chờ','Con cần giúp']),
+  activity('pairs',5,'Tìm cặp lời giao tiếp trên chuyến đi',['Con dừng lại','đi cùng con','Con muốn nghỉ','Con cần giúp']),
+];

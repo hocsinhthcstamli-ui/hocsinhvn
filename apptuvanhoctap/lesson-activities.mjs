@@ -1,4 +1,6 @@
 import {cardImage} from './card-art.mjs';
+import {mathQuestions} from './content/math-journey.mjs';
+import {computerQuestions} from './content/computer-journey.mjs';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const question = (text, answer, choices) => ({text, answer, choices});
 export const videoQuestions = {
@@ -47,7 +49,7 @@ export function activitiesFor(lesson) {
   }));
   rounds.push({prompt:'Khi chưa làm được hoặc chưa rõ, con có thể nhờ giúp.', words:['Con cần giúp']});
   rounds.push({prompt:'Khi muốn kết thúc hoạt động, con báo với người đồng hành.', words:['Con xong rồi']});
-  return {rounds, questions: lesson.youtube ? (videoQuestions[lesson.youtube.url?.match(/[?&]v=([\w-]+)/)?.[1]] || []) : []};
+  return {rounds,kind:computerQuestions[lesson.id]?'computer':mathQuestions[lesson.id]?'math':'video',questions:computerQuestions[lesson.id] || mathQuestions[lesson.id] || (lesson.youtube ? (videoQuestions[lesson.youtube.url?.match(/[?&]v=([\w-]+)/)?.[1]] || []) : [])};
 }
 export function activityMarkup(lesson) {
   return `<lesson-activities data-content="${esc(JSON.stringify(activitiesFor(lesson)))}"></lesson-activities>`;
@@ -59,7 +61,9 @@ function pictureChoice(text) {
 class LessonActivities extends (globalThis.HTMLElement || class {}) {
   connectedCallback() {
     this.content=JSON.parse(this.dataset.content); this.round=0;this.quiz=0;this.built=[];this.done=new Set();this.answers=new Set();this.quizMistakes=0;this.sentenceMistakes=0;this.sentencesSaved=false;this.quizSaved=false;
-    this.innerHTML=`${this.content.questions.length ? '<section class="panel video-activity"><h2>Xem video rồi chọn hình</h2><p>Con có thể dừng video để trả lời từng câu.</p><div class="video-question"></div></section>' : ''}<section class="panel guided-activity"><h2>Cùng luyện 5 câu bằng thẻ</h2><p>Nghe mẫu · Chọn thẻ · Đọc câu.</p><div class="guided-round"></div></section>`;
+    const title={math:'Cùng giải 5 câu hỏi Toán',computer:'Cùng thực hành 5 câu hỏi Máy tính'}[this.content.kind]||'Xem video rồi chọn hình';
+    const hint={math:'Em có thể dùng vật thật, bảng số hoặc máy tính. Kết quả thực hành không thay điểm giáo viên.',computer:'Quan sát hình và chọn cách xử lý. Em có thể nhờ hỗ trợ; kết quả thực hành không thay điểm giáo viên.'}[this.content.kind]||'Con có thể dừng video để trả lời từng câu.';
+    this.innerHTML=`${this.content.questions.length ? `<section class="panel video-activity"><h2>${title}</h2><p>${hint}</p><div class="video-question"></div></section>` : ''}<section class="panel guided-activity"><h2>Cùng luyện 5 câu bằng thẻ</h2><p>Nghe mẫu · Chọn thẻ · Đọc câu.</p><div class="guided-round"></div></section>`;
     this.addEventListener('click',this.handler=e=>this.click(e));this.drawQuiz();this.drawRound();
   }
   disconnectedCallback(){this.removeEventListener('click',this.handler);this.dispatchEvent(new CustomEvent('activity-stop',{bubbles:true}));}
@@ -68,7 +72,7 @@ class LessonActivities extends (globalThis.HTMLElement || class {}) {
   drawQuiz(){
     if(!this.content.questions.length)return;
     const q=this.content.questions[this.quiz];
-    this.querySelector('.video-question').innerHTML=`<p class="eyebrow">Câu hỏi ${this.quiz+1}/5</p><h3>${esc(q.text)}</h3><div class="activity-options">${q.choices.map((text,i)=>`<button class="activity-choice" data-activity="answer" aria-label="Trả lời: ${esc(text)}" data-index="${i}">${pictureChoice(text)}</button>`).join('')}</div><p class="activity-feedback" role="status"></p><div class="button-row"><button class="secondary" data-activity="quizPrev" ${this.quiz===0?'disabled':''}>← Câu trước</button><button class="primary" data-activity="quizNext" ${this.quiz===4?'disabled':''}>Câu tiếp →</button></div>`;
+    this.querySelector('.video-question').innerHTML=`<p class="eyebrow">Câu hỏi ${this.quiz+1}/5 · Đã trả lời đúng ${this.answers.size}/5</p><h3>${esc(q.text)}</h3>${q.image?`<img class="math-question-image" src="/assets/art/${esc(q.image)}.webp" alt="${esc({'math-counting':'Hai hàng khối đếm','math-sharing':'Ba đĩa bút chia đều','math-fractions':'Bánh chia bốn phần bằng nhau','math-clock':'Đồng hồ kim dài chỉ 12, kim ngắn chỉ 3'}[q.image]||'Hình minh họa tình huống')}">`:''}<div class="activity-options">${q.choices.map((text,i)=>`<button class="activity-choice" data-activity="answer" aria-label="Trả lời: ${esc(text)}" data-index="${i}">${this.content.kind==='math'?`<strong>${esc(text)}</strong>`:this.content.kind==='computer'&&!cardImage({text})?`<strong>${esc(text)}</strong>`:pictureChoice(text)}</button>`).join('')}</div><p class="activity-feedback" role="status">${this.answers.size===5?'✓ Đã hoàn thành 5 câu hỏi.':this.answers.has(this.quiz)?'✓ Em đã trả lời đúng câu này.':''}</p><div class="button-row"><button class="secondary" data-activity="quizPrev" ${this.quiz===0?'disabled':''}>← Câu trước</button><button class="primary" data-activity="quizNext" ${this.quiz===4?'disabled':''}>Câu tiếp →</button></div>`;
   }
   drawRound(){
     const r=this.content.rounds[this.round];this.built=[];
@@ -82,8 +86,10 @@ class LessonActivities extends (globalThis.HTMLElement || class {}) {
     if(action==='answer'){
       const q=this.content.questions[this.quiz], chosen=q.choices[Number(b.dataset.index)], correct=q.answer===null||chosen===q.answer;
       if(correct)this.answers.add(this.quiz);else this.quizMistakes++;
-      if(this.answers.size===5&&!this.quizSaved){this.quizSaved=true;this.result('video',this.quizMistakes);}
+      this.querySelector('.video-question .eyebrow').textContent=`Câu hỏi ${this.quiz+1}/5 · Đã trả lời đúng ${this.answers.size}/5`;
+      if(this.answers.size===5&&!this.quizSaved){this.quizSaved=true;this.result(this.content.kind||'video',this.quizMistakes);}
       this.speak([chosen]);this.querySelector('.activity-feedback').textContent=correct?(q.answer===null?'✓ Con đã chia sẻ lựa chọn của mình.':'✓ Đúng rồi! Con có thể xem lại đoạn video và chọn câu tiếp.'):'Mình xem lại đoạn video rồi thử chọn hình khác nhé.';
+      if(['math','computer'].includes(this.content.kind))this.querySelector('.activity-feedback').textContent=correct?(this.answers.size===5?'✓ Em đã hoàn thành 5 câu hỏi!':'✓ Đúng rồi! Em có thể sang câu tiếp. Với câu khó, em được dùng công cụ hỗ trợ.'):'Chưa khớp. Em xem lại đề hoặc nhờ giúp rồi thử lại nhé.';
       return;
     }
     if(action==='quizNext'||action==='quizPrev'){this.quiz+=action==='quizNext'?1:-1;this.drawQuiz();return;}

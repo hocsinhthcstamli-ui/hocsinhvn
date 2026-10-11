@@ -20,7 +20,12 @@ async def main():
         'node', '--input-type=module', '-e',
         'import {completeSeedData} from "./content/seed.mjs"; '
         'import {activitiesFor} from "./lesson-activities.mjs"; '
-        'console.log(JSON.stringify([...new Set(completeSeedData().lessons.flatMap(l=>[...l.cards.map(c=>c.text),...activitiesFor(l).rounds.flatMap(r=>r.words)]))]));'
+        'import {computerFunDefinitions} from "./content/computer-fun.mjs"; '
+        'import {mathFunDefinitions} from "./content/math-fun.mjs"; '
+        'import {vehiclesFunDefinitions} from "./content/vehicles-fun.mjs"; '
+        'import {animalsFunDefinitions} from "./content/animals-fun.mjs"; '
+        'import {lifeFunDefinitions} from "./content/life-fun.mjs"; '
+        'console.log(JSON.stringify([...new Set([...completeSeedData().lessons.flatMap(l=>[...l.cards.map(c=>c.text),...activitiesFor(l).rounds.flatMap(r=>r.words),...activitiesFor(l).questions.flatMap(q=>q.choices)]),...[...lifeFunDefinitions,...animalsFunDefinitions,...vehiclesFunDefinitions,...mathFunDefinitions,...computerFunDefinitions].filter(a=>a.kind==="listen").flatMap(a=>a.items.map(i=>i.label))])]));'
     ], cwd=ROOT, check=True, capture_output=True, text=True, encoding='utf-8')
     texts = json.loads(export.stdout)
     manifest = {}

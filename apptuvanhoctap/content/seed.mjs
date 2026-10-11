@@ -1,4 +1,6 @@
 import { topicLessons } from "./topic-journeys.mjs";
+import { mathLessons } from './math-journey.mjs';
+import {computerLessons} from './computer-journey.mjs';
 import { attachTopicVideos } from "./topic-videos.mjs";
 import { seedData } from "../domain.mjs";
 import { phase1Lessons } from "./phase-1.mjs";
@@ -8,7 +10,7 @@ import { reviewedVideos } from "./phase-4.mjs";
 export function completeSeedData() {
   const data = seedData();
   data.lessons.push(
-    ...structuredClone([...phase1Lessons, ...phase2Lessons, ...phase3Lessons, ...topicLessons]),
+    ...structuredClone([...phase1Lessons, ...phase2Lessons, ...phase3Lessons, ...topicLessons, ...mathLessons, ...computerLessons]),
   );
   for (const item of reviewedVideos)
     for (const id of item.lessonIds)

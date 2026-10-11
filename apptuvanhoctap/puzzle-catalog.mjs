@@ -1,4 +1,18 @@
 export const puzzlePacks = {
+  computer:[
+    ['journey-computer','Cùng khám phá máy tính'],['computer-devices','Bộ máy tính'],
+    ['computer-practice','Thao tác trên máy'],['computer-break','Nghỉ mắt và vận động'],
+    ['computer-mouse','Chuột máy tính'],['computer-keyboard','Bàn phím'],
+    ['computer-typing','Luyện gõ phím'],['computer-help','Nhờ giáo viên hỗ trợ'],
+    ['computer-folder','Thư mục bài học'],['computer-safe','Bảo vệ tài khoản'],
+  ].map(([id,title])=>({id,title,src:`/assets/puzzles/computer/${id}.webp`})),
+  math: [
+    ['journey-math','Cùng học toán'],['math-shopping','Mua đồ dùng'],
+    ['math-stage-2','Khám phá hình học'],['math-counting','Sáu khối đếm'],
+    ['math-clock','Đồng hồ ba giờ'],['math-solids','Các hình khối'],
+    ['math-shapes','Các hình phẳng'],['math-measuring','Đo độ dài'],
+    ['math-fractions','Chia bánh thành bốn phần'],['math-sharing','Chia đều bút'],
+  ].map(([id,title])=>({id,title,src:`/assets/puzzles/math/${id}.webp`})),
   animals: [
     ["animal-cat", "Chú mèo"], ["animal-rabbit", "Bạn thỏ"],
     ["animal-hen", "Gà mái"], ["animal-duck", "Chú vịt"],

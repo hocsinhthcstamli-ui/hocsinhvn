@@ -1,6 +1,10 @@
 // Optimized copies of the user-supplied artwork. Source files remain in anh/.
 import { newArtNames } from "./new-art.mjs";
+import { mathArtNames } from './math-art.mjs';
+import {computerArtNames} from './computer-art.mjs';
 export const artNames = [
+  ...mathArtNames,
+  ...computerArtNames,
   ...newArtNames,
   "stage-1",
   "stage-2",

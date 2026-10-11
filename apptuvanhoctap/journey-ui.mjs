@@ -16,6 +16,10 @@ export const journeyCatalog = [
     { title: "Giao tiếp về chuyến đi", image: "vehicles-communicate", description: "Chọn hình để chia sẻ về nơi con muốn đến." },
     { title: "Đi lại cùng người đồng hành", image: "vehicles-practice", description: "Tìm hiểu những tình huống đi lại trong cuộc sống." },
   ] },
+  {id:'math',number:4,title:'Toán học trong cuộc sống',cover:'journey-math',ready:true,description:'THCS · Cùng khám phá số, hình học, tiền bạc và thời gian.',stages:[
+    {image:'math-counting'}, {image:'math-stage-2'}, {image:'math-shopping'},
+  ]},
+  {id:'computer',number:5,title:'Làm chủ máy tính',cover:'journey-computer',ready:true,description:'THCS · Thiết bị, thao tác và an toàn trên mạng.',stages:[{image:'computer-devices'},{image:'computer-practice'},{image:'computer-help'}]},
 ];
 
 export function assignedJourneys(plans) {

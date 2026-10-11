@@ -149,7 +149,7 @@ test(
         200,
       );
     let state = await teacher.json("/api/state");
-    assert.equal(state.data.lessons.length, 68);
+    assert.equal(state.data.lessons.length, 80);
     assert.equal(state.data.learningPlans.length, 3);
     const lesson = state.data.lessons[0];
     const drive = {
