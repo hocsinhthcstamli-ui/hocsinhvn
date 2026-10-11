@@ -1,3 +1,4 @@
+import { makeTopicPlan } from "./content/topic-journeys.mjs";
 import { createRecordedVietnameseSpeaker } from "./speech.mjs";
 import { youtubeId, youtubeValue, videoSuggestions } from "./youtube.mjs";
 import { driveVideo, driveEmbed } from "./drive.mjs";
@@ -7,6 +8,7 @@ import { schoolBands, makeCurriculumPlan } from "./curriculum.mjs";
 import { guideMarkup, curriculumChooser } from "./curriculum-ui.mjs";
 import { availableLessonIds } from "./pathways.mjs";
 import { pathwayView, planEditor } from "./pathway-ui.mjs";
+import { journeyCatalog, journeyChooser, journeyPreview, backToJourneys } from "./journey-ui.mjs";
 import {
   domains,
   roles,
@@ -36,6 +38,7 @@ let data,
   childId = "",
   lessonId = "",
   selectedStage = "",
+  selectedJourney = "",
   curriculumBand = "all",
   sentence = [],
   users = [],
@@ -55,22 +58,29 @@ const currentChild = () => data.children.find((c) => c.id === childId);
 const currentLesson = () =>
   data.lessons.find((l) => l.id === lessonId) || data.lessons[0];
 const manager = () => user.role === "teacher";
-const currentPlan = () => data.learningPlans.find((p) => p.childId === childId);
+const currentPlan = () => data.learningPlans.find((p) => p.childId === childId && (p.journeyId || "life") === (selectedJourney || "life"));
 const childLessons = () =>
   user.role === "child"
     ? data.lessons.filter((l) =>
-        availableLessonIds(currentPlan()).includes(l.id),
+        data.learningPlans.filter(p => p.childId === childId).flatMap(availableLessonIds).includes(l.id),
       )
     : data.lessons;
-const plansView = () =>
-  (manager() ? curriculumChooser(data.lessons) : "") +
-  pathwayView(
+const topicChooser = () => {
+  const bands = [...new Set((currentPlan()?.stages || []).flatMap(s => s.lessonIds).map(id => data.lessons.find(l => l.id === id)?.teachingGuide?.band).filter(Boolean))];
+  return `<section class="panel"><h3>Bộ bài phù hợp với bé</h3><p>Đang dùng: ${bands.map(b => esc(schoolBands[b])).join(", ") || "Bài do giáo viên chọn"}. Giáo viên có thể đổi bộ hoặc điều chỉnh từng bài theo nhu cầu của bé.</p><div class="button-row">${Object.entries(schoolBands).map(([band, title]) => `<button class="secondary" data-action="previewCurriculum" data-band="${band}">Xem bộ ${esc(title)}</button>`).join("")}</div></section>`;
+};
+const plansView = () => {
+  if (!selectedJourney) return journeyChooser(data.learningPlans.filter(p => p.childId === childId), currentChild()?.name || "con");
+  if (!journeyCatalog.find(j => j.id === selectedJourney)?.ready) return journeyPreview(selectedJourney);
+  return backToJourneys + (manager() ? (selectedJourney === "life" ? curriculumChooser(data.lessons) : topicChooser()) : "") + pathwayView(
     currentPlan(),
     data.lessons,
     manager(),
     currentChild()?.name || "con",
     selectedStage,
+    journeyCatalog.find(j => j.id === selectedJourney),
   );
+};
 const navItems = () =>
   ({
     admin: [
@@ -867,16 +877,27 @@ function migrateLegacy(old) {
   };
 }
 const actions = {
+  openJourney: (el) => {
+    if (!journeyCatalog.some((journey) => journey.id === el.dataset.id)) return;
+    selectedJourney = el.dataset.id;
+    selectedStage = "";
+    return navigate("pathways");
+  },
+  showJourneys: () => {
+    selectedJourney = "";
+    selectedStage = "";
+    return navigate("pathways");
+  },
   viewTeachingGuide: (el) => {
     const lesson = data.lessons.find((l) => l.id === el.dataset.id);
     if (lesson?.teachingGuide)
       openModal(lesson.title, guideMarkup(lesson.teachingGuide));
   },
   previewCurriculum: (el) => {
-    const plan = makeCurriculumPlan(childId, el.dataset.band, data.lessons);
+    const plan = selectedJourney === "life" ? makeCurriculumPlan(childId, el.dataset.band, data.lessons) : makeTopicPlan(childId, selectedJourney, el.dataset.band);
     openModal(
       `Mẫu ${schoolBands[el.dataset.band]}`,
-      `<p class="hint">Đây là bản xem trước cho ${esc(currentChild().name)}. Chỉ khi bấm lưu, danh sách bài mới thay thế lộ trình đang dùng và điểm mở khóa được tính lại. ${plan.stages.map((stage, i) => `Lộ trình ${i + 1}: ${stage.lessonIds.length} bài`).join(" · ")}.</p>${planEditor(plan, data.lessons)}`,
+      `<p class="hint">Đây là bản xem trước cho ${esc(currentChild().name)}. Chỉ khi bấm lưu, danh sách bài mới thay thế lộ trình đang dùng và điểm mở khóa được tính lại. ${plan.stages.map((stage, i) => `Đích đến ${i + 1}: ${stage.lessonIds.length} bài`).join(" · ")}.</p>${planEditor(plan, data.lessons)}`,
     );
   },
   openStage: (el) => {
@@ -899,11 +920,12 @@ const actions = {
       "gradeLesson",
       {
         childId,
+        journeyId: selectedJourney || "life",
         stageId: el.dataset.stage,
         lessonId: el.dataset.id,
         score: null,
       },
-      "Đã xóa điểm bài học và tính lại điểm lộ trình.",
+      "Đã xóa điểm bài học và tính lại điểm đích đến.",
     ),
   movePlanLesson: (el) => {
     const plan = structuredClone(currentPlan());
@@ -996,6 +1018,8 @@ const actions = {
   closeModal: () => modal.close(),
   logout: async () => {
     vietnameseSpeaker?.stop();
+    selectedJourney = "";
+    selectedStage = "";
     await api("/api/logout", {});
     data = null;
     user = null;
@@ -1004,6 +1028,8 @@ const actions = {
   },
   editChild: (el) => editChild(el.dataset.id),
   selectChild: (el) => {
+    selectedJourney = "";
+    selectedStage = "";
     childId = el.dataset.id;
     return navigate("dashboard");
   },
@@ -1199,6 +1225,7 @@ document.addEventListener("submit", async (event) => {
         await api("/api/" + form.dataset.form, values);
         await load();
         selectedStage = "";
+        selectedJourney = "";
         view = user.role === "child" ? "pathways" : "dashboard";
         render();
         break;
@@ -1244,6 +1271,7 @@ document.addEventListener("submit", async (event) => {
           "gradeLesson",
           {
             childId,
+            journeyId: selectedJourney || "life",
             stageId: form.dataset.stage,
             lessonId: id,
             score: Number(values.score),
@@ -1267,7 +1295,7 @@ document.addEventListener("submit", async (event) => {
         });
         await mutate(
           "savePlan",
-          { childId, stages },
+          { childId, journeyId: selectedJourney || "life", stages },
           "Đã lưu lộ trình riêng của bé.",
         );
         break;
@@ -1368,6 +1396,7 @@ document.addEventListener("change", async (event) => {
     }
     if (el.id === "childPicker") {
       childId = el.value;
+      selectedJourney = "";
       selectedStage = "";
       if (user.role === "child") view = "pathways";
       sentence = [];

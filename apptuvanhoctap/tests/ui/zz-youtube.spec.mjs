@@ -38,6 +38,7 @@ test("Drive links work on mobile and deployed mode hides local file uploads", as
       });
     });
     await login(learner, "learner", "child");
+  await learner.locator('[data-action="openJourney"][data-id="life"]').click();
     await learner.locator('[data-action=openStage][data-id="1"]').click();
     await learner.locator(`[data-action=openLesson][data-id="${id}"]`).click();
     await expect(learner.locator("[data-action=playDrive]")).toBeVisible();
@@ -81,7 +82,7 @@ test("Teacher attaches a source; mobile learner loads YouTube only on tap; remov
   await page.locator(".sidebar [data-view=content]").click();
   await expect(page.locator("#curriculumBand")).toBeVisible();
   await page.locator("#curriculumBand").selectOption("primary");
-  await expect(page.locator(".profile-grid > article")).toHaveCount(18);
+  await expect(page.locator(".profile-grid > article")).toHaveCount(30);
   await page
     .locator('[data-action=editLesson][data-id="primary-school-01"]')
     .click();
@@ -120,6 +121,7 @@ test("Teacher attaches a source; mobile learner loads YouTube only on tap; remov
       });
     });
     await login(learner, "learner", "child");
+  await learner.locator('[data-action="openJourney"][data-id="life"]').click();
     await learner.locator('[data-action=openStage][data-id="1"]').click();
     await learner.locator(`[data-action=openLesson][data-id="${id}"]`).click();
     await expect(learner.locator("[data-action=playYoutube]")).toBeVisible();

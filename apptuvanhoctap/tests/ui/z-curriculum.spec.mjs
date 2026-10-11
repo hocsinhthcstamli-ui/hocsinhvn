@@ -15,7 +15,7 @@ test("Phase 1 guides, school filters and previewed templates work without replac
   await page.locator(".sidebar [data-view=content]").click();
   await expect(page.locator("#curriculumBand")).toBeVisible();
   await page.locator("#curriculumBand").selectOption("primary");
-  await expect(page.locator(".profile-grid > article")).toHaveCount(18);
+  await expect(page.locator(".profile-grid > article")).toHaveCount(30);
   await page.locator("[data-action=viewTeachingGuide]").first().click();
   await expect(
     page.getByRole("heading", { name: "5 cơ hội quan sát" }),
@@ -34,6 +34,7 @@ test("Phase 1 guides, school filters and previewed templates work without replac
     before.data.lessons.find((l) => l.id === id).teachingGuide,
   );
   await page.locator(".sidebar [data-view=pathways]").click();
+  await page.locator('[data-action="openJourney"][data-id="life"]').click();
   await page.locator(".curriculum-picker summary").click();
   await page
     .locator("[data-action=previewCurriculum][data-band=primary]")
@@ -66,6 +67,7 @@ test("Phase 1 guides, school filters and previewed templates work without replac
   });
   const learner = await context.newPage();
   await login(learner, "learner", "child");
+  await learner.locator('[data-action="openJourney"][data-id="life"]').click();
   await learner.locator('[data-action=openStage][data-id="1"]').click();
   await expect(learner.locator(".pathway-lesson")).toHaveCount(6);
   await expect(

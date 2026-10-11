@@ -1,0 +1,332 @@
+[
+  {
+    "name": "journey-life",
+    "kind": "cover",
+    "source": "anh/Gemini_Generated_Image_5xjaw55xjaw55xja.png",
+    "sha256": "5d58840753acd3e9d3933ef0c9b4387e09ee243a3e58ce5130dcf9e90ccaa4f5",
+    "output": "assets/art/journey-life.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 72646
+  },
+  {
+    "name": "journey-animals",
+    "kind": "cover",
+    "source": "anh/Gemini_Generated_Image_63bm5k63bm5k63bm.png",
+    "sha256": "f085a110d741f6e1604f9df0416361130d3ea5a4526aa9f77f6191d91bc935cf",
+    "output": "assets/art/journey-animals.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 71792
+  },
+  {
+    "name": "journey-vehicles",
+    "kind": "cover",
+    "source": "anh/Gemini_Generated_Image_f30hbvf30hbvf30h.png",
+    "sha256": "744f434f95f4f013d6b0eb39d47d77f84e8f0b6ef233a770f38cce9a8e9c1586",
+    "output": "assets/art/journey-vehicles.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 68198
+  },
+  {
+    "name": "animals-discover",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_spc1utspc1utspc1.png",
+    "sha256": "66da37716a375c6885f4cbf22dc379abc83945f19d9f662d46f990dd010a8109",
+    "output": "assets/art/animals-discover.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 66874
+  },
+  {
+    "name": "animals-communicate",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_h2cj4ch2cj4ch2cj.png",
+    "sha256": "a05ed9c873bd5f71938198ee194305794768998db66e5fe8a071b018913b3653",
+    "output": "assets/art/animals-communicate.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 85718
+  },
+  {
+    "name": "animals-practice",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_1hj9oh1hj9oh1hj9.png",
+    "sha256": "cf87c815cd39330a125eb7463a887b56110c092013feab193f04495f1b942ed0",
+    "output": "assets/art/animals-practice.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 83990
+  },
+  {
+    "name": "vehicles-communicate",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_3futy83futy83fut.png",
+    "sha256": "645c04f012987c27501cb1d146909c00344db6f6c88c3b4678d11dd477cf1917",
+    "output": "assets/art/vehicles-communicate.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 78784
+  },
+  {
+    "name": "vehicles-practice",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_vjju5dvjju5dvjju.png",
+    "sha256": "dddbb8dccfe69b5183cc28b4fe4cc2b46e830946ab0029a78c3985d9314eea23",
+    "output": "assets/art/vehicles-practice.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 84780
+  },
+  {
+    "name": "animal-cat",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_70pv6n70pv6n70pv.png",
+    "sha256": "d0ea271f49c8db1557480ac2bcf482053bebff43e2a80ce02ded151cd42c2936",
+    "output": "assets/art/animal-cat.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 19298
+  },
+  {
+    "name": "animal-rabbit",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_iy2392iy2392iy23.png",
+    "sha256": "c379fde833e1bc352c76e67ed2673070d7b9b89a16ae1be7edb0d99f2e57345d",
+    "output": "assets/art/animal-rabbit.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 13528
+  },
+  {
+    "name": "animal-hen",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_jge47jjge47jjge4.png",
+    "sha256": "49d46f62627e8de40125e9b33393eb995666676558bb5e5a216a2a387d88a9c7",
+    "output": "assets/art/animal-hen.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 15656
+  },
+  {
+    "name": "animal-duck",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_am1bttam1bttam1b.png",
+    "sha256": "c6d24b94fbc31c969a4ecae505f2ce1bc1d586315d0b362959611f32c0e11a87",
+    "output": "assets/art/animal-duck.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 11502
+  },
+  {
+    "name": "animal-goat",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_ct34b4ct34b4ct34.png",
+    "sha256": "0b0bd6123bcb07f735a1303f93bb1bb1f94a33ce895887bf1fdaee4c064045b8",
+    "output": "assets/art/animal-goat.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 11608
+  },
+  {
+    "name": "animal-sheep",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_b7pte1b7pte1b7pt.png",
+    "sha256": "d39a87e1892851da75e36ed5d81e50fe1adaffba58e903e707f514c1dea868c6",
+    "output": "assets/art/animal-sheep.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 18000
+  },
+  {
+    "name": "animal-frog",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_ulv5gzulv5gzulv5.png",
+    "sha256": "d302e6bf5ccfee55b939b847e9bb014370c171e2d737764be98fc0a62e2d5468",
+    "output": "assets/art/animal-frog.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 21682
+  },
+  {
+    "name": "animal-elephant",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_wm8qomwm8qomwm8q.png",
+    "sha256": "b618d9370dbb9679af57df9578cf6963fac7d22bcc03d1974082f0de3853b510",
+    "output": "assets/art/animal-elephant.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 13030
+  },
+  {
+    "name": "vehicle-car",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_9ntof99ntof99nto.png",
+    "sha256": "79f1594fc0eeb0d2746817fa422ae693f794085d61b064c931f71c448e890341",
+    "output": "assets/art/vehicle-car.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 14640
+  },
+  {
+    "name": "vehicle-motorbike",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_xa43kmxa43kmxa43.png",
+    "sha256": "b392e3dd7bdb2ff68bd67ec52d23a3265672f54e3b4ee8a5a5796107b9f94d80",
+    "output": "assets/art/vehicle-motorbike.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 16384
+  },
+  {
+    "name": "vehicle-bus",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_pz930jpz930jpz93.png",
+    "sha256": "c91dd8e2b0134e99a901edab0ec437aab352ca5cd119e47fc1ad5ec95484a25c",
+    "output": "assets/art/vehicle-bus.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 18310
+  },
+  {
+    "name": "vehicle-ambulance",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_epku3yepku3yepku.png",
+    "sha256": "a22164711cac1a25bc30d662962ed56cecd4267a3a57a8b0b8bbcad8e2a840ef",
+    "output": "assets/art/vehicle-ambulance.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 18424
+  },
+  {
+    "name": "vehicle-helicopter",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_l5d6cql5d6cql5d6.png",
+    "sha256": "1d7bde87bbb86af77fd48bee46f1ffb32ce68f013beab9677e587934cb5e5766",
+    "output": "assets/art/vehicle-helicopter.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 23414
+  },
+  {
+    "name": "vehicle-boat",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_j3957bj3957bj395.png",
+    "sha256": "ca1ebab71d4920ae29eb10a778897653b342cf4988012527092b71ff6450d325",
+    "output": "assets/art/vehicle-boat.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 23842
+  },
+  {
+    "name": "vehicle-metro",
+    "kind": "card",
+    "source": "anh/Gemini_Generated_Image_ysagc2ysagc2ysag.png",
+    "sha256": "f527deccd4f1db28309a07f9e1cfd300fcc4e291b7e481f8e3827e1f7e7bf642",
+    "output": "assets/art/vehicle-metro.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 17214
+  },
+  {
+    "name": "sticker-explore",
+    "kind": "sticker",
+    "source": "anh/Gemini_Generated_Image_jnw237jnw237jnw2.png",
+    "sha256": "accdec4a7b3b9161cf1e5feef6a61a6e582ec195587a1b1d208b4a940e091729",
+    "output": "assets/art/sticker-explore.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 11700
+  },
+  {
+    "name": "sticker-care",
+    "kind": "sticker",
+    "source": "anh/Gemini_Generated_Image_g5h46zg5h46zg5h4.png",
+    "sha256": "e3f99c8a4e990a9d6f00c09559c5961d89cec905fec38afd951208f69f8e3a85",
+    "output": "assets/art/sticker-care.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 16414
+  },
+  {
+    "name": "sticker-choose",
+    "kind": "sticker",
+    "source": "anh/Gemini_Generated_Image_ard74ard74ard74a.png",
+    "sha256": "c0039998c89cd36f28622538db657f6260d703956ab35fd38b0bbf83b0b55471",
+    "output": "assets/art/sticker-choose.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 12838
+  },
+  {
+    "name": "sticker-together",
+    "kind": "sticker",
+    "source": "anh/Gemini_Generated_Image_3782dk3782dk3782.png",
+    "sha256": "90f9b3e350fc5eb99b965a33a798e4d90b2447e7b9c5e262a0e60801eda6b369",
+    "output": "assets/art/sticker-together.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 20972
+  },
+  {
+    "name": "sticker-step",
+    "kind": "sticker",
+    "source": "anh/Gemini_Generated_Image_62vvf362vvf362vv.png",
+    "sha256": "c76a76cb022a6fe6afabfd85f3a51f425b27fd3b8aa48d90b9169335adab14d2",
+    "output": "assets/art/sticker-step.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 21584
+  },
+  {
+    "name": "sticker-wave",
+    "kind": "sticker",
+    "source": "anh/Gemini_Generated_Image_vggwacvggwacvggw.png",
+    "sha256": "7b6ea1f8f78d74cb2d8746e44b6fc0a2e7c507c7b4b009557f37d5734a042989",
+    "output": "assets/art/sticker-wave.webp",
+    "width": 480,
+    "height": 480,
+    "bytes": 8444
+  },
+  {
+    "name": "communication-help",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_jcd7pjcd7pjcd7pj.png",
+    "sha256": "22afaf4812a3ea8d309d3833a3fd1bbeee3c3332779eba8079fc4ed9059528b3",
+    "output": "assets/art/communication-help.webp",
+    "width": 720,
+    "height": 720,
+    "bytes": 21942
+  },
+  {
+    "name": "communication-together",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_pcyhipcyhipcyhip.png",
+    "sha256": "ff8aae8338aebe94a444e06d3f17d2d421a6c96dac10ec2411f6d742edbe69df",
+    "output": "assets/art/communication-together.webp",
+    "width": 720,
+    "height": 720,
+    "bytes": 53650
+  },
+  {
+    "name": "vehicle-seatbelt",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_8hi18j8hi18j8hi1.png",
+    "sha256": "9d2c33955d83da8581fb71acb8e9c2807d3e6ed8184a7f16e27a4872cdc9511b",
+    "output": "assets/art/vehicle-seatbelt.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 62200
+  },
+  {
+    "name": "vehicle-helmet",
+    "kind": "scene",
+    "source": "anh/Gemini_Generated_Image_xos5afxos5afxos5.png",
+    "sha256": "523c08df3be75d8ed4a7f78431160a1f511445f3d1f8c46d6735a56a8d790bae",
+    "output": "assets/art/vehicle-helmet.webp",
+    "width": 960,
+    "height": 717,
+    "bytes": 110336
+  }
+]

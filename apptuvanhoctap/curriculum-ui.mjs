@@ -15,7 +15,7 @@ export function guideMarkup(guide) {
 export function curriculumChooser(lessons) {
   if (!Object.keys(schoolBands).some((band) => curriculumReady(lessons, band)))
     return "";
-  return `<details class="curriculum-picker"><summary>Mẫu lộ trình theo cấp học</summary><p>Chọn theo bối cảnh và nhu cầu hỗ trợ thực tế. Xem số bài của từng lộ trình trong bản xem trước và chỉnh trước khi lưu cho học sinh. Lộ trình chưa có bài sẽ hiển thị đang chuẩn bị nội dung.</p><div class="button-row">${Object.entries(
+  return `<details class="curriculum-picker"><summary>Mẫu lộ trình theo cấp học</summary><p>Chọn theo bối cảnh và nhu cầu hỗ trợ thực tế. Xem số bài của từng đích đến trong bản xem trước và chỉnh trước khi lưu cho học sinh. Đích đến chưa có bài sẽ hiển thị đang chuẩn bị nội dung.</p><div class="button-row">${Object.entries(
     schoolBands,
   )
     .map(

@@ -1,5 +1,7 @@
 // Optimized copies of the user-supplied artwork. Source files remain in anh/.
+import { newArtNames } from "./new-art.mjs";
 export const artNames = [
+  ...newArtNames,
   "stage-1",
   "stage-2",
   "stage-3",

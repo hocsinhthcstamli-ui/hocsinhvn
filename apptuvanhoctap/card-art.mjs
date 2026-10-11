@@ -1,4 +1,26 @@
 import { cardPictures } from "./card-art-manifest.mjs";
+const suppliedPictures = {};
+for (const [name, words] of [
+  ["animal-cat", ["con mèo", "mèo"]],
+  ["animal-rabbit", ["con thỏ", "thỏ"]],
+  ["animal-hen", ["con gà", "gà", "gà mái"]],
+  ["animal-duck", ["con vịt", "vịt"]],
+  ["animal-goat", ["con dê", "dê"]],
+  ["animal-sheep", ["con cừu", "cừu"]],
+  ["animal-frog", ["con ếch", "ếch"]],
+  ["animal-elephant", ["con voi", "voi"]],
+  ["vehicle-car", ["xe", "ô tô", "xe ô tô"]],
+  ["vehicle-motorbike", ["xe máy"]],
+  ["vehicle-bus", ["xe buýt"]],
+  ["vehicle-ambulance", ["xe cứu thương"]],
+  ["vehicle-helicopter", ["trực thăng", "máy bay trực thăng"]],
+  ["vehicle-boat", ["thuyền", "thuyền chèo"]],
+  ["vehicle-metro", ["tàu điện", "tàu điện đô thị"]],
+  ["vehicle-helmet", ["đội mũ bảo hiểm"]],
+  ["vehicle-seatbelt", ["thắt dây an toàn"]],
+  ["communication-help", ["con cần giúp", "giúp con", "em cần giúp"]],
+  ["communication-together", ["đi cùng con", "đi cùng em được không?"]],
+]) for (const word of words) suppliedPictures[word] = `/assets/art/${name}.webp`;
 
 // Exact, reviewed equivalents. Never guess a picture from a negated sentence.
 const aliases = {};
@@ -6,6 +28,16 @@ function equivalents(picture, labels) {
   for (const label of labels) aliases[label.toLocaleLowerCase("vi")] = picture;
 }
 equivalents("chào", ["Con chào"]);
+equivalents("con muốn", ["Con muốn đi"]);
+equivalents("chọn", ["Con chọn"]);
+equivalents("đặt câu hỏi", ["Con chưa biết"]);
+equivalents("thích", ["Con thích"]);
+equivalents("không thích", ["Con không thích"]);
+equivalents("sợ", ["Con sợ"]);
+equivalents("con chó", ["chó"]);
+equivalents("không muốn", ["Con không muốn"]);
+equivalents("uống nước", ["nước"]);
+equivalents("hết rồi", ["Con xong rồi"]);
 equivalents("vẽ", ["vẽ tranh"]);
 equivalents("giúp", ["giúp con", "Con cần giúp", "Em cần giúp", "Em cần hỗ trợ", "Em cần người hỗ trợ", "Nhờ người hỗ trợ", "Gọi người giúp con", "Em tìm người khác giúp"]);
 equivalents("uống nước", ["nước uống", "bình nước", "Con cần nước", "Em cần nước"]);
@@ -32,5 +64,5 @@ equivalents("tai", ["đau tai"]);
 export function cardImage(card) {
   if (card.image) return card.image;
   const text = card.text.normalize("NFC").trim().toLocaleLowerCase("vi");
-  return cardPictures[text] || cardPictures[aliases[text]] || "";
+  return suppliedPictures[text] || cardPictures[text] || cardPictures[aliases[text]] || "";
 }

@@ -1,3 +1,4 @@
+import { addTopicContent } from "./content/topic-journeys.mjs";
 import http from "node:http";
 import { openDatabase, initializeDatabase } from "./database.mjs";
 import { completeSeedData } from "./content/seed.mjs";
@@ -219,9 +220,11 @@ function recordValue(value) {
 }
 function planValue(value, lessons, allowScores = true) {
   if (!value || !Array.isArray(value.stages) || value.stages.length !== 3)
-    fail("Mỗi bé cần đúng 3 lộ trình.");
+    fail("Mỗi lộ trình cần đúng 3 đích đến.");
+  if (value.journeyId && !["life", "animals", "vehicles"].includes(value.journeyId)) fail("Invalid journey.");
   return {
     childId: str(value.childId, "Học sinh", 100),
+    ...(value.journeyId ? { journeyId: value.journeyId } : {}),
     stages: value.stages.map((stage, index) => {
       if (
         !stage ||
@@ -232,7 +235,7 @@ function planValue(value, lessons, allowScores = true) {
           lessons.some((lesson) => lesson.id === id),
         )
       )
-        fail("Danh sách bài học trong lộ trình không hợp lệ (tối đa 100 bài).");
+        fail("Danh sách bài học trong đích đến không hợp lệ (tối đa 100 bài).");
       const grades = allowScores ? stage.lessonScores || {} : {};
       if (
         typeof grades !== "object" ||
@@ -245,11 +248,11 @@ function planValue(value, lessons, allowScores = true) {
             score > 100,
         )
       )
-        fail("Tiến độ lộ trình không hợp lệ.");
+        fail("Tiến độ đích đến không hợp lệ.");
       return {
         id: String(index + 1),
-        title: str(stage.title, "Tên lộ trình", 150),
-        goal: str(stage.goal || "", "Mục tiêu lộ trình", 1500, false),
+        title: str(stage.title, "Tên đích đến", 150),
+        goal: str(stage.goal || "", "Mục tiêu đích đến", 1500, false),
         lessonIds: stage.lessonIds,
         lessonScores: Object.fromEntries(Object.entries(grades)),
       };
@@ -316,20 +319,20 @@ export function validateBackup(input) {
   if (
     d.learningPlans !== undefined &&
     (!Array.isArray(d.learningPlans) ||
-      d.learningPlans.length > clean.children.length)
+      d.learningPlans.length > clean.children.length * 3)
   )
     fail("Lộ trình trong bản sao lưu không hợp lệ.");
   clean.learningPlans = (d.learningPlans || []).map((p) =>
     planValue(p, clean.lessons),
   );
   if (
-    new Set(clean.learningPlans.map((p) => p.childId)).size !==
+    new Set(clean.learningPlans.map((p) => `${p.childId}:${p.journeyId || "life"}`)).size !==
       clean.learningPlans.length ||
     clean.learningPlans.some((p) => !childIds.has(p.childId))
   )
     fail("Lộ trình tham chiếu học sinh không hợp lệ.");
   for (const c of clean.children)
-    if (!clean.learningPlans.some((p) => p.childId === c.id))
+    if (!clean.learningPlans.some((p) => p.childId === c.id && (!p.journeyId || p.journeyId === "life")))
       clean.learningPlans.push(defaultPlan(c.id, clean.lessons));
   return clean;
 }
@@ -398,13 +401,17 @@ export async function createApp({
         .prepare("SELECT data FROM app_state WHERE id=1")
         .get();
       const migrated = JSON.parse(initial.data);
+      let changed = false;
       if (!migrated.learningPlans) {
         migrated.learningPlans = migrated.children.map((c) =>
           defaultPlan(c.id, migrated.lessons),
         );
-        await db
-          .prepare("UPDATE app_state SET data=?,version=version+1 WHERE id=1")
-          .run(JSON.stringify(migrated));
+        changed = true;
+      }
+      changed = addTopicContent(migrated) || changed;
+      if (changed) {
+        validateBackup(migrated);
+        await db.prepare("UPDATE app_state SET data=?,version=version+1 WHERE id=1").run(JSON.stringify(migrated));
       }
     })
     .catch(async (error) => {
@@ -571,6 +578,10 @@ export async function createApp({
     ["/voice-manifest.mjs", "voice-manifest.mjs"],
     ...artFiles.map((file) => [file, file.slice(1)]),
     ["/art.mjs", "art.mjs"],
+    ["/new-art.mjs", "new-art.mjs"],
+    ["/journey-ui.mjs", "journey-ui.mjs"],
+    ["/content/topic-journeys.mjs", "content/topic-journeys.mjs"],
+    ["/content/topic-videos.mjs", "content/topic-videos.mjs"],
     ["/curriculum.mjs", "curriculum.mjs"],
     ["/curriculum-ui.mjs", "curriculum-ui.mjs"],
     ["/youtube.mjs", "youtube.mjs"],
@@ -913,6 +924,7 @@ export async function createApp({
             else {
               d.children.push(c);
               d.learningPlans.push(defaultPlan(c.id, d.lessons));
+              addTopicContent(d);
             }
           } else if (action === "deleteChild") {
             requireRole(user, "admin");
@@ -928,7 +940,7 @@ export async function createApp({
           } else if (action === "savePlan") {
             requireRole(user, "teacher");
             child(v.childId);
-            const old = d.learningPlans.find((p) => p.childId === v.childId);
+            const old = d.learningPlans.find((p) => p.childId === v.childId && (p.journeyId || "life") === (v.journeyId || "life"));
             const plan = planValue(v, d.lessons, false);
             for (const stage of plan.stages)
               stage.lessonScores = Object.fromEntries(
@@ -942,14 +954,14 @@ export async function createApp({
           } else if (action === "gradeLesson") {
             requireRole(user, "teacher");
             child(v.childId);
-            const plan = d.learningPlans.find((p) => p.childId === v.childId);
+            const plan = d.learningPlans.find((p) => p.childId === v.childId && (p.journeyId || "life") === (v.journeyId || "life"));
             const index = plan?.stages.findIndex((s) => s.id === v.stageId);
             const stage = plan?.stages[index];
             if (!stage || !stage.lessonIds.includes(v.lessonId))
               fail("Bài học không nằm trong lộ trình.");
             if (v.score !== null) integer(v.score, "Điểm đánh giá", 0, 100);
             if (v.score !== null && !stageUnlocked(plan, index))
-              fail("Điểm các lộ trình trước phải trên 80%.", 403);
+              fail("Điểm các đích đến trước phải trên 80%.", 403);
             const entries = Object.entries(stage.lessonScores || {}).filter(
               ([id]) => id !== v.lessonId,
             );
@@ -1034,9 +1046,7 @@ export async function createApp({
             child(v.childId);
             if (
               user.role === "child" &&
-              !availableLessonIds(
-                d.learningPlans.find((p) => p.childId === v.childId),
-              ).includes(v.lessonId)
+              !d.learningPlans.filter(p => p.childId === v.childId).flatMap(availableLessonIds).includes(v.lessonId)
             )
               fail("Bài học chưa được mở trong lộ trình của con.", 403);
             if (!d.lessons.some((l) => l.id === v.lessonId))

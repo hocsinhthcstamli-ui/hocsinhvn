@@ -1,4 +1,70 @@
 /* User-supplied illustrations, with functional labels and controls kept in HTML. */
+.journey-selector {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin: 24px 0 36px;
+}
+.journey-choice {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #d6e1d3;
+  border-radius: 26px;
+  background: #fffefa;
+  box-shadow: 0 8px 24px #26352b08;
+}
+.journey-cover {
+  padding: 12px;
+  background: #f7f6ed;
+}
+.journey-cover img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  border-radius: 18px;
+}
+.journey-choice-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 22px;
+}
+.journey-choice-body p,
+.journey-choice-body h3 { margin: 0; }
+.journey-choice-body h3 { font-size: 1.35rem; line-height: 1.35; }
+.journey-description { line-height: 1.6; flex: 1; }
+.journey-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.journey-card-meta .badge { white-space: normal; }
+.journey-ready-status,
+.journey-preview-status { color: #51634f; font-size: .9rem; line-height: 1.5; }
+.journey-choice-body button { width: 100%; min-height: 52px; }
+.journey-back { margin-bottom: 16px; min-height: 44px; }
+.journey-selector-heading .greeting-buddy { border-radius: 22px; }
+.journey-preview-map .preview-stage {
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  max-width: 740px;
+  width: 80%;
+}
+.journey-preview-map .preview-stage .pathway-art { width: 100%; height: auto; }
+.journey-preview-map .preview-stage-art { width: 100%; height: auto; border-radius: 16px; }
+.journey-preview-map .stage-content p { line-height: 1.6; }
+@media (max-width: 900px) {
+  .journey-selector { grid-template-columns: 1fr; max-width: 600px; margin-inline: auto; }
+  .journey-cover img { max-height: 260px; }
+}
+@media (max-width: 600px) {
+  .journey-choice-body { padding: 18px; }
+  .journey-choice-body h3 { font-size: 1.25rem; }
+  .journey-selector { gap: 20px; }
+  .journey-preview-map .preview-stage { grid-template-columns: 1fr; width: 100%; }
+  .journey-preview-map .preview-stage .pathway-art { max-width: 320px; margin: auto; }
+  .journey-preview-map .preview-stage-art { max-height: 190px; }
+}
 .aac-card img,
 .focus-main .aac-card img {
   width: min(100%, 176px);

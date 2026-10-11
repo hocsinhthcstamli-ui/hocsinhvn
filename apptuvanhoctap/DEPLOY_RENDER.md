@@ -1,12 +1,18 @@
 # Deploy Cùng Con lên Render + Supabase
 
-Đã có cấu hình chạy thật với PostgreSQL. Không cần Supabase Auth, Storage, `anon` hay `service_role`: tài khoản vẫn do ứng dụng quản lý; video lưu link YouTube/Google Drive, ảnh thẻ lưu trong dữ liệu PostgreSQL. **Chưa kết nối hoặc chuyển dữ liệu lên project Supabase của bạn trong lượt triển khai mã này** vì chưa có `.env` chứa mật khẩu mới.
+Đã có cấu hình chạy thật với PostgreSQL. Không cần Supabase Auth, Storage, `anon` hay `service_role`: tài khoản vẫn do ứng dụng quản lý; video lưu link YouTube/Google Drive. Ảnh giáo viên tải lên lưu trong dữ liệu PostgreSQL; ảnh và giọng đọc đi kèm ứng dụng nằm trong `assets/`.
+
+## Cập nhật ứng dụng đang chạy
+
+Push nhánh `main` lên GitHub để Render tự deploy nếu Auto-Deploy đang bật. Khi phiên bản mới khởi động với `DATABASE_URL` hiện có, ứng dụng bổ sung 24 bài Động vật/Xe cộ và hai kế hoạch còn thiếu cho mỗi trẻ vào Supabase, giữ nguyên tài khoản, phân công, bài đã sửa và điểm cũ. Có 3 video được gắn vào 12 bài phù hợp; link giáo viên đã thêm hoặc chủ động xóa được giữ nguyên. Không chạy `db:migrate` để ghi đè database đang sử dụng.
+
+Ảnh/giọng đọc cập nhật theo mã nguồn; không cần upload Supabase Storage. Kiểm tra sau deploy bằng tài khoản giáo viên: đủ 3 thẻ lộ trình, bài mới có hình/giọng Việt và nút xem video. Tổng bộ bài mặc định hiện là **68 bài** (44 bài cũ + 24 bài mới), mỗi trẻ có 3 lộ trình.
 
 ## 1. Chọn giữ dữ liệu cũ hoặc bắt đầu mới
 
 **Muốn giữ hồ sơ, tài khoản, bài học và điểm đang có:** làm bước 2 rồi chạy chuyển dữ liệu ở bước 3 **trước khi khởi động app bằng PostgreSQL hoặc deploy Render lần đầu**.
 
-**Muốn bắt đầu mới:** bỏ qua bước 3. Lần đầu Render khởi động sẽ tạo schema, tài khoản admin từ biến môi trường và đủ **44 bài** (36 bài theo cấp học + 8 bài ban đầu). Không tạo học sinh hay tài khoản test. Mỗi lần deploy sau giữ nguyên dữ liệu, không nạp lại hoặc ghi đè bài đã chỉnh.
+**Muốn bắt đầu mới:** bỏ qua bước 3. Lần đầu Render khởi động sẽ tạo schema, tài khoản admin từ biến môi trường và đủ **68 bài**. Không tạo học sinh hay tài khoản test. Các lần deploy sau chỉ bổ sung nội dung chủ đề còn thiếu, không ghi đè bài đã chỉnh.
 
 ## 2. Chuẩn bị Supabase và `.env`
 

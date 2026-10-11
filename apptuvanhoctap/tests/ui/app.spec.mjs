@@ -260,6 +260,8 @@ test("Assigned teacher assesses, teaches and records; parent and learner have di
     } else {
       await expect(other.locator(".focus-shell")).toBeVisible();
       await expect(other.locator(".sidebar,.mobile-tabs")).toHaveCount(0);
+      await expect(other.locator(".journey-choice")).toHaveCount(3);
+      await other.locator('[data-action="openJourney"][data-id="life"]').click();
       await expect(other.locator(".pathway-card")).toHaveCount(3);
       await expect(
         other.locator('[data-action="openStage"][data-id="2"]'),
@@ -301,13 +303,14 @@ test("Teacher uploads a playable video and customizes a child pathway; confirmat
   await page.getByRole("button", { name: "Lưu bài học", exact: true }).click();
   await expect(page.locator("#modal")).not.toBeVisible();
   await navigate(page, "pathways");
+  await page.locator('[data-action="openJourney"][data-id="life"]').click();
   await page.getByRole("button", { name: "Điều chỉnh lộ trình" }).click();
   const choices = page.locator('input[name="stage1"]');
   for (let i = 0; i < (await choices.count()); i++)
     await choices.nth(i).uncheck();
   await page.locator('input[name="stage1"][value="aac-request-basic"]').check();
   await page
-    .getByLabel("Tên lộ trình 1", { exact: true })
+    .getByLabel("Tên đích đến 1", { exact: true })
     .fill("Giao tiếp của Minh Anh");
   await page.getByRole("button", { name: "Lưu lộ trình của bé" }).click();
   await expect(page.locator("#modal")).not.toBeVisible();
@@ -316,6 +319,7 @@ test("Teacher uploads a playable video and customizes a child pathway; confirmat
   });
   const learner = await context.newPage();
   await login(learner, "learner", "child");
+  await learner.locator('[data-action="openJourney"][data-id="life"]').click();
   await expect(learner.locator(".pathway-card")).toHaveCount(3);
   await expect(
     learner.locator('[data-action="openStage"][data-id="2"]'),
@@ -422,4 +426,78 @@ test("Teaching pictures and real Vietnamese audio work without installed voices 
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: "tmp/lesson-pictures-mobile.png", fullPage: true });
+});
+
+test("Three journey cards open independent plans without changing learner data", async ({ page }) => {
+  await login(page, "learner", "child");
+  const before = await (await page.request.get("/api/state")).json();
+  await expect(page.locator(".journey-choice")).toHaveCount(3);
+  await expect(page.locator(".journey-choice").nth(0)).toContainText("Có bài học");
+  await expect(page.locator(".journey-choice").nth(1)).toContainText("Có bài học");
+  await expect.poll(() => page.locator(".journey-cover img").evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
+  await page.screenshot({ path: "tmp/journey-selector-desktop.png", fullPage: true });
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await assertFits(page);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "tmp/journey-selector-mobile.png", fullPage: true });
+  const writes = [];
+  page.on("request", request => { if (request.method() === "POST") writes.push(request.url()); });
+  for (const id of ["animals", "vehicles"]) {
+    await page.locator(`[data-action=openJourney][data-id=${id}]`).click();
+    await expect(page.locator(".map-stage")).toHaveCount(3);
+    await expect.poll(() => page.locator(".preview-stage-art").evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
+    await expect(page.locator('[data-action=openStage][data-id="1"]')).toBeEnabled();
+    await expect(page.locator('[data-action=openStage][data-id="2"]')).toBeDisabled();
+    await page.locator('[data-action=openStage][data-id="1"]').click();
+    await expect(page.locator('[data-action=openLesson]')).toHaveCount(2);
+    for (const width of [320, 390, 430]) {
+      await page.setViewportSize({ width, height: 844 });
+      await assertFits(page);
+    }
+    await page.screenshot({ path: `tmp/${id}-journey-preview.png`, fullPage: true });
+    await page.locator("[data-action=showJourneys]").click();
+  }
+  await page.locator("[data-action=openJourney][data-id=life]").click();
+  await expect(page.locator(".map-stage")).toHaveCount(3);
+  await expect(page.locator('[data-action=openStage][data-id="1"]')).toBeEnabled();
+  expect((await (await page.request.get("/api/state")).json()).data).toEqual(before.data);
+  expect(writes).toEqual([]);
+});
+
+test("Teacher selects topic band and grades only that journey; learner uses illustrated cards", async ({ page }) => {
+  await login(page, "teacher", "teacher");
+  await navigate(page, "pathways");
+  await page.locator('[data-action=openJourney][data-id=animals]').click();
+  await page.locator('[data-action=previewCurriculum][data-band=secondary]').click();
+  await page.locator('form[data-form=plan] button[type=submit]').click();
+  await expect(page.locator('#modal')).not.toBeVisible();
+  await expect(page.locator('#view')).toContainText("Đang dùng: Cấp 2");
+  await page.locator('[data-action=openStage][data-id="1"]').click();
+  const forms = page.locator('form[data-form=grade]');
+  await expect(forms).toHaveCount(2);
+  for (let i = 0; i < 2; i++) {
+    await forms.nth(i).locator('input[name=score]').fill("90");
+    await forms.nth(i).locator('button[type=submit]').click();
+    await expect(page.locator(".pathway-lesson").nth(i).locator(".lesson-state")).toContainText("90/100");
+  }
+  await page.locator('[data-action=showJourneys]').click();
+  await expect(page.locator('[data-journey=animals]')).toContainText("1/3 đích đến");
+  await expect(page.locator('[data-journey=vehicles]')).toContainText("0/3 đích đến");
+  await page.context().clearCookies();
+  await login(page, "learner", "child");
+  await page.locator('[data-action=openJourney][data-id=animals]').click();
+  await expect(page.locator('[data-action=openStage][data-id="2"]')).toBeEnabled();
+  await page.locator('[data-action=openStage][data-id="1"]').click();
+  await page.locator('[data-action=openLesson]').first().click();
+  await expect(page.locator('.lesson-video')).toContainText('SuRiKa KiDs TV');
+  await expect(page.locator('.lesson-video a')).toHaveAttribute('href', 'https://www.youtube.com/watch?v=JuD8GXnjJQw');
+  await expect(page.locator('[data-action=playYoutube]')).toBeVisible();
+  await expect(page.locator('.youtube-player iframe')).toHaveCount(0);
+  await expect(page.locator('.aac-card img')).toHaveCount(5);
+  await expect.poll(() => page.locator('.aac-card img').evaluateAll(images => images.every(i => i.complete && i.naturalWidth > 0))).toBe(true);
+  await page.setViewportSize({width: 390, height: 844});
+  await assertFits(page);
+  await page.screenshot({path: 'tmp/animals-lesson-mobile.png', fullPage: true});
 });
