@@ -306,6 +306,10 @@ test(
 );
 
 test("Remote database TLS verifies certificates; production cannot silently use SQLite", async () => {
+  const supabase = postgresOptions("postgresql://user:pass@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres");
+  assert.equal(supabase.ssl.rejectUnauthorized, true);
+  assert.ok(supabase.ssl.ca.some((cert) => cert.includes("BEGIN CERTIFICATE")));
+  assert.equal(postgresOptions("postgresql://user:pass@evil-supabase.com/postgres").ssl.ca, undefined);
   assert.equal(
     postgresOptions(
       "postgresql://user:pass@example.com:5432/postgres?sslmode=no-verify",

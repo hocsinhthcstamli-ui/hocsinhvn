@@ -37,7 +37,7 @@ Mật khẩu DB và mật khẩu tài khoản admin là **hai mật khẩu khác
 npm run db:check
 ```
 
-Lệnh chỉ kiểm tra kết nối, không tạo bảng hoặc ghi dữ liệu. TLS xác minh chứng chỉ khi kết nối ra ngoài máy. Nếu báo lỗi chuỗi chứng chỉ, lấy chứng chỉ CA database chính thức của Supabase rồi đặt `DATABASE_CA_FILE` trỏ tới tệp PEM; không tắt xác minh TLS.
+Lệnh chỉ kiểm tra kết nối, không tạo bảng hoặc ghi dữ liệu. TLS xác minh chứng chỉ khi kết nối ra ngoài máy. Ứng dụng tự nạp `supabase-ca.crt` cho hostname thuộc Supabase, khắc phục `SELF_SIGNED_CERT_IN_CHAIN` trên Render. Chứng chỉ công khai lấy từ https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt (Supabase Root 2021 CA, hạn 26/04/2031). Nếu dùng CA riêng, đặt `DATABASE_CA_FILE` trỏ tới tệp PEM; không tắt xác minh TLS.
 
 Ứng dụng tự tạo các bảng trong schema **`aac_private`**, thu hồi quyền `PUBLIC`, `anon`, `authenticated` và bật RLS. Không thêm schema này vào các schema công khai của Supabase Data API. Dùng kết nối database của backend để chạy app, không gọi trực tiếp bảng từ trình duyệt.
 

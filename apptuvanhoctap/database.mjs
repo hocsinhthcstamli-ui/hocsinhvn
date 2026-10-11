@@ -3,6 +3,8 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import pg from "pg";
+import { readFileSync } from "node:fs";
+import { rootCertificates } from "node:tls";
 
 export const tables = [
   "users",
@@ -22,9 +24,13 @@ export function postgresOptions(connectionString) {
   const local = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(
     url.hostname,
   );
+  const ssl = local ? false : { rejectUnauthorized: true };
+  if (ssl && (url.hostname.endsWith(".supabase.com") || url.hostname.endsWith(".supabase.co"))) {
+    ssl.ca = [...rootCertificates, readFileSync(new URL("./supabase-ca.crt", import.meta.url), "utf8")];
+  }
   return {
     connectionString: url.toString(),
-    ssl: local ? false : { rejectUnauthorized: true },
+    ssl,
     max: 5,
     connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
