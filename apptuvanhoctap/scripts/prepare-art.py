@@ -24,6 +24,7 @@ ASSETS = [
     ('wnv5z0', 'garden', 420, True),
     ('bj3892', 'journey-background', 800, False),
     ('nh1k9l', 'lesson-cover', 960, False),
+    ('hmogv3', 'buddy-request', 480, False),
 ]
 
 def cutout(image):

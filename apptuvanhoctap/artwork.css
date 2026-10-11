@@ -1,4 +1,20 @@
 /* User-supplied illustrations, with functional labels and controls kept in HTML. */
+.aac-card img,
+.focus-main .aac-card img {
+  width: min(100%, 176px);
+  height: 140px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 16px;
+}
+@media (max-width: 600px) {
+  .aac-card img,
+  .focus-main .aac-card img {
+    width: min(100%, 128px);
+    height: 104px;
+    border-radius: 12px;
+  }
+}
 .teaching-guide section {
   margin: 20px 0;
   padding-top: 14px;
@@ -252,9 +268,10 @@
   margin: 16px 0 12px;
 }
 .learning-cue .cue-buddy {
-  width: 52px;
-  height: 52px;
-  flex: 0 0 52px;
+  width: 112px;
+  height: 100px;
+  flex: 0 0 112px;
+  border-radius: 20px;
 }
 .learning-cue h2 {
   margin: 0;
@@ -425,9 +442,9 @@
     gap: 8px;
   }
   .learning-cue .cue-buddy {
-    width: 42px;
-    height: 42px;
-    flex-basis: 42px;
+    width: 76px;
+    height: 72px;
+    flex-basis: 76px;
   }
   .lesson-cover-banner {
     gap: 12px;

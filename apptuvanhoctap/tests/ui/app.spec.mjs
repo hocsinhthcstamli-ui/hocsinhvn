@@ -379,3 +379,47 @@ test("Teacher uploads a playable video and customizes a child pathway; confirmat
   });
   await context.close();
 });
+
+test("Teaching pictures and real Vietnamese audio work without installed voices on mobile", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "speechSynthesis", { value: undefined, configurable: true });
+    const NativeAudio = window.Audio;
+    window.playedVietnamese = [];
+    window.Audio = function (...args) {
+      const audio = new NativeAudio(...args);
+      audio.addEventListener("ended", () => window.playedVietnamese.push({ src: audio.src, duration: audio.duration }));
+      return audio;
+    };
+  });
+  await login(page, "teacher", "teacher");
+  await navigate(page, "lessons");
+  await page.getByLabel("Tìm bài học").fill("Con muốn");
+  await page.getByRole("button", { name: "Mở bài học" }).click();
+  await expect(page.locator(".aac-card img")).toHaveCount(6);
+  await expect(page.locator(".aac-card .aac-symbol")).toHaveCount(0);
+  await expect.poll(() => page.locator(".aac-card img").evaluateAll((images) => images.every((im) => im.complete && im.naturalWidth > 0))).toBe(true);
+  await page.getByLabel("Đọc khi chọn thẻ").uncheck();
+  for (const text of ["Con muốn", "con chó"])
+    await page.getByRole("button", { name: text, exact: true }).click();
+  await page.getByRole("button", { name: "Đọc câu" }).click();
+  await expect.poll(() => page.evaluate(() => window.playedVietnamese.length), { timeout: 15000 }).toBe(2);
+  expect(await page.evaluate(() => window.playedVietnamese.every((clip) => clip.src.includes("/assets/voice/") && clip.duration > 0))).toBe(true);
+  await expect(page.locator("#toast")).not.toContainText("cài đặt");
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await expect.poll(() => page.evaluate(async () => {
+    const names = await caches.keys();
+    const cache = await caches.open(names.find((name) => name.startsWith("cung-con-public-")));
+    return (await cache.keys()).filter((request) => request.url.includes("/assets/voice/")).length;
+  })).toBeGreaterThanOrEqual(2);
+  await page.context().setOffline(true);
+  await page.getByRole("button", { name: "Đọc câu" }).click();
+  await expect.poll(() => page.evaluate(() => window.playedVietnamese.length), { timeout: 15000 }).toBe(4);
+  await page.context().setOffline(false);
+  await page.screenshot({ path: "tmp/lesson-pictures-desktop.png", fullPage: true });
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await assertFits(page);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "tmp/lesson-pictures-mobile.png", fullPage: true });
+});

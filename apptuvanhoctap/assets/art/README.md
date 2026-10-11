@@ -1,6 +1,6 @@
 # Bộ ảnh giao diện Cùng Con
 
-Ảnh gốc do người dùng cung cấp trong `anh/`; không đổi tên hay sửa ảnh gốc. 12 bản WebP được chọn cho giao diện, gồm 3 trạm học, 3 sticker, 3 biểu tượng và nền/vườn/ảnh bìa. Xem `sources.json` để đối chiếu từng ảnh với tên tệp gốc.
+Ảnh gốc do người dùng cung cấp trong `anh/`; không đổi tên hay sửa ảnh gốc. 13 bản WebP được chọn cho giao diện, gồm 3 trạm học, 3 sticker, 3 biểu tượng và nền/vườn/ảnh bìa. Xem `sources.json` để đối chiếu từng ảnh với tên tệp gốc.
 
 Các ảnh gốc có kênh alpha nhưng đều đặc hoàn toàn, một số vẽ sẵn ô caro. Bản dùng trên web đã tách nền trung tính, cắt lề và giảm kích thước. Không dùng những ảnh còn họa tiết ô caro hoặc chữ vẽ sẵn làm nút hay sơ đồ tương tác.
 

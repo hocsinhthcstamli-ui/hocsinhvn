@@ -12,6 +12,7 @@ export const artNames = [
   "garden",
   "journey-background",
   "lesson-cover",
+  "buddy-request",
 ];
 export const artFiles = artNames.map((name) => `/assets/art/${name}.webp`);
 export function picture(name, className = "", eager = false) {

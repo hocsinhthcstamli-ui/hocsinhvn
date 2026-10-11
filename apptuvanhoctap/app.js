@@ -1,7 +1,8 @@
-import { createVietnameseSpeaker } from "./speech.mjs";
+import { createRecordedVietnameseSpeaker } from "./speech.mjs";
 import { youtubeId, youtubeValue, videoSuggestions } from "./youtube.mjs";
 import { driveVideo, driveEmbed } from "./drive.mjs";
 import { picture } from "./art.mjs";
+import { cardImage } from "./card-art.mjs";
 import { schoolBands, makeCurriculumPlan } from "./curriculum.mjs";
 import { guideMarkup, curriculumChooser } from "./curriculum-ui.mjs";
 import { availableLessonIds } from "./pathways.mjs";
@@ -478,8 +479,8 @@ function lessonTile(l) {
   return `<article class="lesson-tile"><div class="tile-art" aria-hidden="true">${l.cards
     .slice(0, 3)
     .map((card) =>
-      card.image
-        ? `<img src="${esc(card.image)}" alt="">`
+      cardImage(card)
+        ? `<img src="${esc(cardImage(card))}" alt="">`
         : `<span>${esc(card.icon)}</span>`,
     )
     .join(
@@ -571,7 +572,7 @@ function kidView(c) {
     .map((x) => option(x.id, x.title, l.id))
     .join(
       "",
-    )}</select></label><span class="badge">${esc(c.name)}</span></div>${lessonVideo(l)}${l.teachingGuide && user.role !== "child" ? `<button class="text-button" data-action="viewTeachingGuide" data-id="${esc(l.id)}">Hướng dẫn đồng hành và thực hành tại nhà</button>` : ""}<div class="learning-cue">${picture("buddy-welcome", "cue-buddy", true)}<h2>${esc(l.prompt)}</h2></div><p class="muted">1. Chạm vào hình · 2. Đọc câu · 3. Hoàn thành</p><div class="sentence-heading"><strong>Câu của con</strong><span>Chọn một thẻ nhiều lần nếu cần</span></div><div id="sentence" class="sentence" aria-live="polite">${sentenceMarkup()}</div><div class="button-row sentence-tools"><button class="secondary" data-action="speakSentence">🔊 Đọc câu</button><button class="text-button" data-action="undoWord">↶ Bỏ thẻ cuối</button><button class="text-button danger-text" data-action="clearSentence">Xóa câu</button><label class="check-label"><input type="checkbox" id="autoSpeak" ${autoSpeak ? "checked" : ""}>Đọc khi chọn thẻ</label></div><div class="aac-grid">${l.cards.map((card, i) => `<button class="aac-card" data-action="addWord" data-index="${i}" aria-label="${esc(card.text)}">${card.image ? `<img src="${esc(card.image)}" alt="">` : `<span class="aac-symbol" aria-hidden="true">${esc(card.icon)}</span>`}<strong>${esc(card.text)}</strong></button>`).join("")}</div><div class="learning-bottom"><p class="hint">Hoàn thành sẽ lưu lượt thực hành và câu ghép. Điểm đúng/sai do người đồng hành ghi riêng.</p><button class="primary" data-action="completePractice">✓ Hoàn thành lượt học</button></div></section>`;
+    )}</select></label><span class="badge">${esc(c.name)}</span></div>${lessonVideo(l)}${l.teachingGuide && user.role !== "child" ? `<button class="text-button" data-action="viewTeachingGuide" data-id="${esc(l.id)}">Hướng dẫn đồng hành và thực hành tại nhà</button>` : ""}<div class="learning-cue">${picture("buddy-request", "cue-buddy", true)}<h2>${esc(l.prompt)}</h2></div><p class="muted">1. Chạm vào hình · 2. Đọc câu · 3. Hoàn thành</p><div class="sentence-heading"><strong>Câu của con</strong><span>Chọn một thẻ nhiều lần nếu cần</span></div><div id="sentence" class="sentence" aria-live="polite">${sentenceMarkup()}</div><div class="button-row sentence-tools"><button class="secondary" data-action="speakSentence">🔊 Đọc câu</button><button class="text-button" data-action="undoWord">↶ Bỏ thẻ cuối</button><button class="text-button danger-text" data-action="clearSentence">Xóa câu</button><label class="check-label"><input type="checkbox" id="autoSpeak" ${autoSpeak ? "checked" : ""}>Đọc khi chọn thẻ</label></div><div class="aac-grid">${l.cards.map((card, i) => `<button class="aac-card" data-action="addWord" data-index="${i}" aria-label="${esc(card.text)}">${cardImage(card) ? `<img src="${esc(cardImage(card))}" alt="">` : `<span class="aac-symbol" aria-hidden="true">${esc(card.icon)}</span>`}<strong>${esc(card.text)}</strong></button>`).join("")}</div><div class="learning-bottom"><p class="hint">Hoàn thành sẽ lưu lượt thực hành và câu ghép. Điểm đúng/sai do người đồng hành ghi riêng.</p><button class="primary" data-action="completePractice">✓ Hoàn thành lượt học</button></div></section>`;
 }
 function lessonVideo(lesson) {
   if (lesson.drive) {
@@ -658,14 +659,8 @@ function sentenceMarkup() {
 }
 let vietnameseSpeaker;
 function speak(text) {
-  if (!text) return toast("Hãy chọn ít nhất một thẻ.");
-  if (!("speechSynthesis" in window))
-    return toast("Trình duyệt này chưa hỗ trợ đọc thành tiếng.", true);
-  vietnameseSpeaker ||= createVietnameseSpeaker(
-    speechSynthesis,
-    SpeechSynthesisUtterance,
-    toast,
-  );
+  if (!text || (Array.isArray(text) && !text.length)) return toast("Hãy chọn ít nhất một thẻ.");
+  vietnameseSpeaker ||= createRecordedVietnameseSpeaker({ notify: toast });
   return vietnameseSpeaker(text);
 }
 function recordCard(r, editable = true) {
@@ -762,7 +757,7 @@ function cardEditorMarkup() {
   return editorCards
     .map(
       (c, i) =>
-        `<div class="card-editor" data-card="${i}"><div class="editor-preview">${c.image ? `<img src="${esc(c.image)}" alt="Ảnh thẻ ${i + 1}">` : `<span>${esc(c.icon)}</span>`}</div><label>Nội dung ${i + 1}<input data-card-field="text" value="${esc(c.text)}" required maxlength="80"></label><label>Biểu tượng<input data-card-field="icon" value="${esc(c.icon)}" maxlength="20" aria-label="Biểu tượng thẻ ${i + 1}"></label><label class="upload-label">Chọn ảnh<input type="file" data-card-image="${i}" accept="image/png,image/jpeg,image/webp"></label>${c.image ? `<button type="button" class="text-button" data-action="removeImage" data-index="${i}">Bỏ ảnh</button>` : ""}<button type="button" class="icon-button danger-text" data-action="removeEditorCard" data-index="${i}" aria-label="Xóa thẻ ${i + 1}">×</button></div>`,
+        `<div class="card-editor" data-card="${i}"><div class="editor-preview">${cardImage(c) ? `<img src="${esc(cardImage(c))}" alt="Ảnh thẻ ${i + 1}">` : `<span>${esc(c.icon)}</span>`}</div><label>Nội dung ${i + 1}<input data-card-field="text" value="${esc(c.text)}" required maxlength="80"></label><label>Biểu tượng<input data-card-field="icon" value="${esc(c.icon)}" maxlength="20" aria-label="Biểu tượng thẻ ${i + 1}"></label><label class="upload-label">Chọn ảnh<input type="file" data-card-image="${i}" accept="image/png,image/jpeg,image/webp"></label>${c.image ? `<button type="button" class="text-button" data-action="removeImage" data-index="${i}">Bỏ ảnh</button>` : ""}<button type="button" class="icon-button danger-text" data-action="removeEditorCard" data-index="${i}" aria-label="Xóa thẻ ${i + 1}">×</button></div>`,
     )
     .join("");
 }
@@ -786,6 +781,7 @@ function settingsView() {
   return `<section class="panel account-panel"><h2>Tài khoản của tôi</h2><p>${esc(user.username)} · ${roles[user.role]}</p><form data-form="password">${field("Mật khẩu hiện tại", input("current", "", "password", 'required autocomplete="current-password" maxlength="200"'))}${field("Mật khẩu mới", input("password", "", "password", 'required minlength="6" maxlength="200" autocomplete="new-password"'))}<p class="form-error" role="alert"></p><button class="primary" type="submit">Đổi mật khẩu</button></form><hr><button class="secondary" data-action="logout">Đăng xuất</button></section><section class="panel install-panel"><h2>Cùng Con trên điện thoại</h2><p>Thêm ứng dụng vào màn hình chính để mở nhanh, với không gian hiển thị rộng hơn.</p><button class="primary" type="button" data-pwa-install hidden>Cài ứng dụng</button><p>Trên iPhone: mở bằng Safari → Chia sẻ → Thêm vào Màn hình chính. Trên Android: chọn Cài ứng dụng trong menu trình duyệt.</p><p class="muted">Cần kết nối mạng để đăng nhập, học và lưu dữ liệu.</p></section>`;
 }
 async function navigate(next) {
+  vietnameseSpeaker?.stop();
   modal.close();
   clearTimeout(toastTimer);
   $("#toast").className = "";
@@ -999,6 +995,7 @@ const actions = {
   retry: boot,
   closeModal: () => modal.close(),
   logout: async () => {
+    vietnameseSpeaker?.stop();
     await api("/api/logout", {});
     data = null;
     user = null;
@@ -1036,10 +1033,11 @@ const actions = {
     $("#sentence").innerHTML = sentenceMarkup();
   },
   clearSentence: () => {
+    vietnameseSpeaker?.stop();
     sentence = [];
     $("#sentence").innerHTML = sentenceMarkup();
   },
-  speakSentence: () => speak(sentence.join(" ")),
+  speakSentence: () => speak([...sentence]),
   completePractice: async () => {
     if (!sentence.length) return toast("Hãy chọn thẻ trước khi hoàn thành.");
     await mutate(

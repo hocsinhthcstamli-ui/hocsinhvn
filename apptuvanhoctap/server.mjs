@@ -15,6 +15,8 @@ import { domains, roles, seedData } from "./domain.mjs";
 import { defaultPlan, availableLessonIds, stageUnlocked } from "./pathways.mjs";
 import { createVideoStore } from "./videos.mjs";
 import { artFiles } from "./art.mjs";
+import { cardPictures } from "./card-art-manifest.mjs";
+import { voiceClips } from "./voice-manifest.mjs";
 import { youtubeValue } from "./youtube.mjs";
 import { driveVideo } from "./drive.mjs";
 
@@ -562,6 +564,11 @@ export async function createApp({
     return result;
   }
   const staticFiles = new Map([
+    ...Object.values(cardPictures).map((file) => [file, file.slice(1)]),
+    ...Object.values(voiceClips).map((file) => [file, file.slice(1)]),
+    ["/card-art.mjs", "card-art.mjs"],
+    ["/card-art-manifest.mjs", "card-art-manifest.mjs"],
+    ["/voice-manifest.mjs", "voice-manifest.mjs"],
     ...artFiles.map((file) => [file, file.slice(1)]),
     ["/art.mjs", "art.mjs"],
     ["/curriculum.mjs", "curriculum.mjs"],
@@ -1109,6 +1116,7 @@ export async function createApp({
         ".webmanifest": "application/manifest+json; charset=utf-8",
         ".png": "image/png",
         ".webp": "image/webp",
+        ".mp3": "audio/mpeg",
         ".html": "text/html; charset=utf-8",
         ".js": "text/javascript; charset=utf-8",
         ".mjs": "text/javascript; charset=utf-8",

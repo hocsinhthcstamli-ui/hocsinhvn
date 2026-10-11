@@ -1,4 +1,4 @@
-const CACHE = "cung-con-public-v10";
+const CACHE = "cung-con-public-v11";
 const PUBLIC_FILES = [
   "/offline.html",
   "/styles.css",
@@ -6,6 +6,9 @@ const PUBLIC_FILES = [
   "/app.js",
   "/domain.mjs",
   "/speech.mjs",
+  "/voice-manifest.mjs",
+  "/card-art.mjs",
+  "/card-art-manifest.mjs",
   "/pathways.mjs",
   "/pathway-ui.mjs",
   "/art.mjs",
@@ -27,6 +30,7 @@ const PUBLIC_FILES = [
     "garden",
     "journey-background",
     "lesson-cover",
+    "buddy-request",
   ].map((name) => `/assets/art/${name}.webp`),
   "/pwa.js",
   "/manifest.webmanifest",
@@ -70,10 +74,16 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-  if (!PUBLIC_FILES.includes(url.pathname)) return;
+  // Only public, content-addressed teaching assets; never learner uploads.
+  const lessonAsset = /^\/assets\/(?:voice\/[a-f0-9]{20}\.mp3|cards\/[a-f0-9]{16}\.webp)$/.test(url.pathname);
+  if (!PUBLIC_FILES.includes(url.pathname) && !lessonAsset) return;
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE);
+      if (lessonAsset) {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+      }
       try {
         const response = await fetch(request);
         if (response.ok) await cache.put(request, response.clone());
