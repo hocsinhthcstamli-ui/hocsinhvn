@@ -19,6 +19,20 @@ import { youtubeValue } from "./youtube.mjs";
 import { driveVideo } from "./drive.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+export function startupFailure(error) {
+  // Only expose known configuration messages; never log connection strings or secrets.
+  const messages = new Set([
+    "Production requires DATABASE_URL; SQLite fallback is disabled.",
+    "Configure ADMIN_USERNAME and ADMIN_PASSWORD for first startup, or import the existing database first.",
+    "Invalid ADMIN_USERNAME.",
+    "Replace ADMIN_PASSWORD before starting.",
+    "Username không hợp lệ (tối đa 60 ký tự).",
+    "Mật khẩu cần từ 6 đến 200 ký tự.",
+    "DATABASE_URL phải là PostgreSQL.",
+  ]);
+  const code = /^[A-Z0-9_]{2,64}$/.test(error.code || "") ? error.code : "Error";
+  return `Startup failed (${code}). ${messages.has(error.message) ? error.message : "Check DATABASE_URL, TLS and first-admin configuration."}`;
+}
 const fail = (message, status = 400) => {
   const e = new Error(message);
   e.status = status;
@@ -1174,9 +1188,7 @@ if (
           }
         : null,
   }).catch((error) => {
-    console.error(
-      `Startup failed (${error.code || error.name}). Check DATABASE_URL, TLS and first-admin configuration.`,
-    );
+    console.error(startupFailure(error));
     process.exit(1);
   });
   const port = Number(process.env.PORT) || 3000;

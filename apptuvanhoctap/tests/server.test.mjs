@@ -3,8 +3,19 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { createApp } from "../server.mjs";
+import { createApp, startupFailure } from "../server.mjs";
 import { domains, sortedRecords } from "../domain.mjs";
+
+test("Startup diagnostics explain configuration errors without exposing secrets", () => {
+  for (const message of [
+    "Configure ADMIN_USERNAME and ADMIN_PASSWORD for first startup, or import the existing database first.",
+    "Invalid ADMIN_USERNAME.",
+    "Mật khẩu cần từ 6 đến 200 ký tự.",
+  ]) assert.ok(startupFailure(new Error(message)).includes(message));
+  assert.ok(!startupFailure(new Error("postgresql://admin:secret@host/db")).includes("secret"));
+  assert.ok(startupFailure({ code: "28P01", message: "secret" }).includes("28P01"));
+  assert.ok(!startupFailure({ code: "secret", message: "secret" }).includes("secret"));
+});
 
 test("Real API: permissions, persistence, validation, backup and concurrency", async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), "aac-test-"));
