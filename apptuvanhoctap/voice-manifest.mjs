@@ -26,6 +26,7 @@ export const voiceClips = {
   "chỗ yên tĩnh hơn": "/assets/voice/3490a41b4bf71adbd839.mp3",
   "chỗ đông người": "/assets/voice/aa628f4c21fae1259db4.mp3",
   "chờ con bên ngoài": "/assets/voice/b72ea8eb4b0a2780d955.mp3",
+  "con bị": "/assets/voice/29d8a9e45a2542816384.mp3",
   "con chào": "/assets/voice/d5bfc338c17f14fb5e26.mp3",
   "con chó": "/assets/voice/bf4b8931a2e7222d1d93.mp3",
   "con chưa biết": "/assets/voice/2f332ad8090c87917668.mp3",

@@ -233,7 +233,7 @@ test("Assigned teacher assesses, teaches and records; parent and learner have di
   await navigate(page, "lessons");
   await page.getByRole("button", { name: "Mở bài học" }).click();
   expect(
-    (await page.locator(".aac-card").first().boundingBox()).y,
+    (await page.locator(".activity-choice").first().boundingBox()).y,
   ).toBeLessThan(650);
   await page.screenshot({
     path: "tmp/teacher-learning-mobile.png",

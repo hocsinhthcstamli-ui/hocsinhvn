@@ -19,7 +19,8 @@ async def main():
     export = subprocess.run([
         'node', '--input-type=module', '-e',
         'import {completeSeedData} from "./content/seed.mjs"; '
-        'console.log(JSON.stringify([...new Set(completeSeedData().lessons.flatMap(l=>l.cards.map(c=>c.text)))]));'
+        'import {activitiesFor} from "./lesson-activities.mjs"; '
+        'console.log(JSON.stringify([...new Set(completeSeedData().lessons.flatMap(l=>[...l.cards.map(c=>c.text),...activitiesFor(l).rounds.flatMap(r=>r.words)]))]));'
     ], cwd=ROOT, check=True, capture_output=True, text=True, encoding='utf-8')
     texts = json.loads(export.stdout)
     manifest = {}

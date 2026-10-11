@@ -1,3 +1,6 @@
+import { initialTemplates } from "./teacher-journeys.mjs";
+import { puzzlePacks } from "./puzzle-catalog.mjs";
+import { puzzleFiles } from "./puzzle-catalog.mjs";
 import { addTopicContent } from "./content/topic-journeys.mjs";
 import http from "node:http";
 import { openDatabase, initializeDatabase } from "./database.mjs";
@@ -221,10 +224,16 @@ function recordValue(value) {
 function planValue(value, lessons, allowScores = true) {
   if (!value || !Array.isArray(value.stages) || value.stages.length !== 3)
     fail("Mỗi lộ trình cần đúng 3 đích đến.");
-  if (value.journeyId && !["life", "animals", "vehicles"].includes(value.journeyId)) fail("Invalid journey.");
+  if (value.journeyId && !(/^(life|animals|vehicles|custom-[a-f0-9-]{36})$/).test(value.journeyId)) fail("Invalid journey.");
+  if(value.kind !== undefined && !['life','animals','vehicles'].includes(value.kind))fail('Loại lộ trình không hợp lệ.');
+  if(value.archived !== undefined && typeof value.archived !== 'boolean')fail('Trạng thái lộ trình không hợp lệ.');
   return {
     childId: str(value.childId, "Học sinh", 100),
     ...(value.journeyId ? { journeyId: value.journeyId } : {}),
+    ...(value.title !== undefined ? { title: str(value.title, "Title", 150) } : {}),
+    ...(value.description !== undefined ? { description: str(value.description, "Description", 1500, false) } : {}),
+    ...(value.kind !== undefined ? {kind: ["life","animals","vehicles"].includes(value.kind) ? value.kind : "life"} : {}),
+    ...(value.archived ? {archived: true} : {}),
     stages: value.stages.map((stage, index) => {
       if (
         !stage ||
@@ -258,6 +267,19 @@ function planValue(value, lessons, allowScores = true) {
       };
     }),
   };
+}
+function templateValue(value, lessons) {
+  str(value.id,'Mã mẫu',100);
+  const plan = planValue({...value, childId:'template',journeyId:value.id},lessons,false);
+  if(!['life','animals','vehicles'].includes(value.kind))fail('Loại bộ mẫu không hợp lệ.');
+  return {id:plan.journeyId,title:str(value.title,'Tên mẫu',150),description:str(value.description||'','Mô tả',1500,false),kind:value.kind,stages:plan.stages};
+}
+function activityValue(value) {
+  if(!['puzzle','sentences','video'].includes(value.kind))fail('Loại hoạt động không hợp lệ.');
+  const total=value.kind==='puzzle'?4:5;
+  if(value.total!==total || value.completed!==total)fail('Hoạt động chưa hoàn thành.');
+  if(!Number.isFinite(Date.parse(str(value.at,'Thời gian',50))))fail('Thời gian không hợp lệ.');
+  return {id:str(value.id,'Mã lượt',100),childId:str(value.childId,'Học sinh',100),journeyId:str(value.journeyId,'Lộ trình',100),itemId:str(value.itemId,'Bài / tranh',100),label:str(value.label,'Tên hoạt động',150),kind:value.kind,total,completed:total,mistakes:integer(value.mistakes,'Số lần thử chưa khớp',0,10000),at:value.at,authorId:str(value.authorId,'Người ghi',100)};
 }
 export function validateBackup(input) {
   const d = input?.data || input;
@@ -319,7 +341,7 @@ export function validateBackup(input) {
   if (
     d.learningPlans !== undefined &&
     (!Array.isArray(d.learningPlans) ||
-      d.learningPlans.length > clean.children.length * 3)
+      d.learningPlans.length > clean.children.length * 30)
   )
     fail("Lộ trình trong bản sao lưu không hợp lệ.");
   clean.learningPlans = (d.learningPlans || []).map((p) =>
@@ -334,6 +356,17 @@ export function validateBackup(input) {
   for (const c of clean.children)
     if (!clean.learningPlans.some((p) => p.childId === c.id && (!p.journeyId || p.journeyId === "life")))
       clean.learningPlans.push(defaultPlan(c.id, clean.lessons));
+  if (d.journeyTemplates !== undefined) {
+    if (!Array.isArray(d.journeyTemplates) || d.journeyTemplates.length > 100) fail("Invalid template library.");
+    clean.journeyTemplates = d.journeyTemplates.map(t => templateValue(t, clean.lessons));
+    if (new Set(clean.journeyTemplates.map(t=>t.id)).size !== clean.journeyTemplates.length) fail("Duplicate template IDs.");
+  }
+  if (d.activityResults !== undefined) {
+    if (!Array.isArray(d.activityResults) || d.activityResults.length > 30000) fail("Invalid activity results.");
+    clean.activityResults = d.activityResults.map(r => activityValue(r));
+    if (clean.activityResults.some(r=>!childIds.has(r.childId))) fail("Unknown activity learner.");
+    if (new Set(clean.activityResults.map(r=>r.id)).size !== clean.activityResults.length) fail("Duplicate activity IDs.");
+  }
   return clean;
 }
 
@@ -409,6 +442,7 @@ export async function createApp({
         changed = true;
       }
       changed = addTopicContent(migrated) || changed;
+      if (!migrated.journeyTemplates) { migrated.journeyTemplates = initialTemplates(migrated.lessons); changed = true; }
       if (changed) {
         validateBackup(migrated);
         await db.prepare("UPDATE app_state SET data=?,version=version+1 WHERE id=1").run(JSON.stringify(migrated));
@@ -441,8 +475,10 @@ export async function createApp({
   };
   const filteredState = async (user) => {
     const result = await readState();
+    if (user.role !== "teacher") delete result.data.journeyTemplates;
+    if (result.data.activityResults) result.data.activityResults = ["teacher","parent"].includes(user.role) ? result.data.activityResults.filter(r=>canChild(user,r.childId)) : [];
     result.data.learningPlans = result.data.learningPlans.filter(
-      (p) => user.role !== "admin" && canChild(user, p.childId),
+      (p) => user.role !== "admin" && canChild(user, p.childId) && (user.role !== "child" || !p.archived),
     );
     if (user.role !== "admin") {
       result.data.children = result.data.children.filter((c) =>
@@ -576,6 +612,12 @@ export async function createApp({
     ["/card-art.mjs", "card-art.mjs"],
     ["/card-art-manifest.mjs", "card-art-manifest.mjs"],
     ["/voice-manifest.mjs", "voice-manifest.mjs"],
+    ["/teacher-journeys.mjs", "teacher-journeys.mjs"],
+    ["/lesson-activities.mjs", "lesson-activities.mjs"],
+    ["/puzzle-catalog.mjs", "puzzle-catalog.mjs"],
+    ["/puzzle-game.mjs", "puzzle-game.mjs"],
+    ["/puzzle.css", "puzzle.css"],
+    ...puzzleFiles.map(file => [file, file.slice(1)]),
     ...artFiles.map((file) => [file, file.slice(1)]),
     ["/art.mjs", "art.mjs"],
     ["/new-art.mjs", "new-art.mjs"],
@@ -931,12 +973,42 @@ export async function createApp({
             child(v.id);
             d.children = d.children.filter((c) => c.id !== v.id);
             d.learningPlans = d.learningPlans.filter((p) => p.childId !== v.id);
+            if(d.activityResults)d.activityResults=d.activityResults.filter(r=>r.childId!==v.id);
             for (const key of [
               "dailyRecords",
               "assessmentHistory",
               "practiceSessions",
             ])
               d[key] = d[key].filter((r) => r.childId !== v.id);
+          } else if (action === "saveTemplate") {
+            requireRole(user, "teacher");
+            const templates = d.journeyTemplates ||= [];
+            const old = templates.find(t=>t.id===v.id);
+            if (v.id && !old) fail("Template not found.",404);
+            if (!old && templates.length >= 100) fail("Template limit reached.");
+            const template = templateValue({...v,id:old?.id || `custom-${randomUUID()}`},d.lessons);
+            if(old)templates[templates.indexOf(old)]=template;else templates.push(template);
+          } else if (action === "deleteTemplate") {
+            requireRole(user, "teacher");
+            d.journeyTemplates = (d.journeyTemplates || []).filter(t=>t.id!==v.id);
+          } else if (action === "archivePlan") {
+            requireRole(user,"teacher"); child(v.childId);
+            const plan=d.learningPlans.find(p=>p.childId===v.childId&&(p.journeyId||"life")===v.journeyId);
+            if(!plan)fail("Plan not found.",404);
+            plan.archived = true;
+          } else if (action === "activityResult") {
+            requireRole(user,"teacher","parent","child"); child(v.childId);
+            const plan=d.learningPlans.find(p=>p.childId===v.childId&&(p.journeyId||"life")===v.journeyId&&!p.archived);
+            if(!plan)fail("Plan unavailable.",403);
+            const item=v.kind==="puzzle" ? puzzlePacks[plan.kind||v.journeyId]?.find(p=>p.id===v.itemId) : d.lessons.find(l=>l.id===v.itemId);
+            if(!item)fail("Activity unavailable.");
+            if(v.kind!=="puzzle" && !availableLessonIds(plan).includes(v.itemId))fail("Lesson locked.",403);
+            const record=activityValue({...v,authorId:user.id,at:new Date().toISOString(),label:item.title});
+            const results=d.activityResults ||= [];
+            if(!results.some(r=>r.id===record.id)) {
+              if(results.length>=30000)fail("Activity result limit reached.");
+              results.push(record);
+            }
           } else if (action === "savePlan") {
             requireRole(user, "teacher");
             child(v.childId);
@@ -950,11 +1022,12 @@ export async function createApp({
                 ).filter(([id]) => stage.lessonIds.includes(id)),
               );
             if (old) d.learningPlans[d.learningPlans.indexOf(old)] = plan;
-            else d.learningPlans.push(plan);
+            else { if(d.learningPlans.filter(p=>p.childId===v.childId).length>=30)fail("Plan limit reached."); d.learningPlans.push(plan); }
           } else if (action === "gradeLesson") {
             requireRole(user, "teacher");
             child(v.childId);
             const plan = d.learningPlans.find((p) => p.childId === v.childId && (p.journeyId || "life") === (v.journeyId || "life"));
+            if(plan?.archived)fail("Plan archived.",403);
             const index = plan?.stages.findIndex((s) => s.id === v.stageId);
             const stage = plan?.stages[index];
             if (!stage || !stage.lessonIds.includes(v.lessonId))
@@ -999,6 +1072,7 @@ export async function createApp({
           } else if (action === "deleteLesson") {
             requireRole(user, "teacher");
             if (
+              (d.journeyTemplates||[]).some(t=>t.stages.some(s=>s.lessonIds.includes(v.id))) ||
               d.learningPlans.some((p) =>
                 p.stages.some((s) => s.lessonIds.includes(v.id)),
               )

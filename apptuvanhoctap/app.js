@@ -1,3 +1,7 @@
+import { templateLibrary, teacherProgress } from "./teacher-journeys.mjs";
+import { puzzlePacks } from "./puzzle-catalog.mjs";
+import { activityMarkup } from "./lesson-activities.mjs";
+import "./puzzle-game.mjs";
 import { makeTopicPlan } from "./content/topic-journeys.mjs";
 import { createRecordedVietnameseSpeaker } from "./speech.mjs";
 import { youtubeId, youtubeValue, videoSuggestions } from "./youtube.mjs";
@@ -8,7 +12,7 @@ import { schoolBands, makeCurriculumPlan } from "./curriculum.mjs";
 import { guideMarkup, curriculumChooser } from "./curriculum-ui.mjs";
 import { availableLessonIds } from "./pathways.mjs";
 import { pathwayView, planEditor } from "./pathway-ui.mjs";
-import { journeyCatalog, journeyChooser, journeyPreview, backToJourneys } from "./journey-ui.mjs";
+import { journeyCatalog, assignedJourneys, journeyChooser, journeyPreview, backToJourneys } from "./journey-ui.mjs";
 import {
   domains,
   roles,
@@ -39,6 +43,7 @@ let data,
   lessonId = "",
   selectedStage = "",
   selectedJourney = "",
+  puzzleOpen = false,
   curriculumBand = "all",
   sentence = [],
   users = [],
@@ -69,16 +74,19 @@ const topicChooser = () => {
   const bands = [...new Set((currentPlan()?.stages || []).flatMap(s => s.lessonIds).map(id => data.lessons.find(l => l.id === id)?.teachingGuide?.band).filter(Boolean))];
   return `<section class="panel"><h3>Bộ bài phù hợp với bé</h3><p>Đang dùng: ${bands.map(b => esc(schoolBands[b])).join(", ") || "Bài do giáo viên chọn"}. Giáo viên có thể đổi bộ hoặc điều chỉnh từng bài theo nhu cầu của bé.</p><div class="button-row">${Object.entries(schoolBands).map(([band, title]) => `<button class="secondary" data-action="previewCurriculum" data-band="${band}">Xem bộ ${esc(title)}</button>`).join("")}</div></section>`;
 };
+const childJourneys = () => assignedJourneys(data.learningPlans.filter(p=>p.childId===childId));
+const puzzleKind = () => currentPlan()?.kind || selectedJourney;
 const plansView = () => {
-  if (!selectedJourney) return journeyChooser(data.learningPlans.filter(p => p.childId === childId), currentChild()?.name || "con");
-  if (!journeyCatalog.find(j => j.id === selectedJourney)?.ready) return journeyPreview(selectedJourney);
-  return backToJourneys + (manager() ? (selectedJourney === "life" ? curriculumChooser(data.lessons) : topicChooser()) : "") + pathwayView(
+  if (puzzleOpen && puzzlePacks[puzzleKind()]) return `<button class="text-button" data-action="closePuzzle">← Về lộ trình ${childJourneys().find(j => j.id === selectedJourney).number}</button><picture-puzzle journey="${puzzleKind()}"></picture-puzzle>`;
+  if (!selectedJourney) return (manager() ? templateLibrary(data.journeyTemplates || []) : "") + journeyChooser(data.learningPlans.filter(p => p.childId === childId), currentChild()?.name || "con") + (manager() ? teacherProgress(data,childId) : "");
+  if (!childJourneys().find(j => j.id === selectedJourney)?.ready) return journeyPreview(selectedJourney);
+  return backToJourneys + (manager() ? `<div class="button-row"><button class="secondary" data-action="viewJourneyResults">Xem k?t qu? th?c h?nh</button><button class="text-button" data-action="unassignJourney">G? l? tr?nh kh?i m?n h?c</button></div>` : "") + (puzzlePacks[puzzleKind()] ? `<section class="puzzle-entry"><img src="/assets/art/sticker-explore.webp" alt=""><div><h3>Ghép ảnh 4 mảnh</h3><p>${puzzlePacks[puzzleKind()].length} bức tranh · Kéo, thả và khám phá</p><button class="primary" data-action="openPuzzle">Chơi ghép ảnh</button></div></section>` : "") + (manager() ? (selectedJourney === "life" ? curriculumChooser(data.lessons) : ["animals","vehicles"].includes(selectedJourney) ? topicChooser() : "") : "") + pathwayView(
     currentPlan(),
     data.lessons,
     manager(),
     currentChild()?.name || "con",
     selectedStage,
-    journeyCatalog.find(j => j.id === selectedJourney),
+    childJourneys().find(j => j.id === selectedJourney),
   );
 };
 const navItems = () =>
@@ -582,7 +590,7 @@ function kidView(c) {
     .map((x) => option(x.id, x.title, l.id))
     .join(
       "",
-    )}</select></label><span class="badge">${esc(c.name)}</span></div>${lessonVideo(l)}${l.teachingGuide && user.role !== "child" ? `<button class="text-button" data-action="viewTeachingGuide" data-id="${esc(l.id)}">Hướng dẫn đồng hành và thực hành tại nhà</button>` : ""}<div class="learning-cue">${picture("buddy-request", "cue-buddy", true)}<h2>${esc(l.prompt)}</h2></div><p class="muted">1. Chạm vào hình · 2. Đọc câu · 3. Hoàn thành</p><div class="sentence-heading"><strong>Câu của con</strong><span>Chọn một thẻ nhiều lần nếu cần</span></div><div id="sentence" class="sentence" aria-live="polite">${sentenceMarkup()}</div><div class="button-row sentence-tools"><button class="secondary" data-action="speakSentence">🔊 Đọc câu</button><button class="text-button" data-action="undoWord">↶ Bỏ thẻ cuối</button><button class="text-button danger-text" data-action="clearSentence">Xóa câu</button><label class="check-label"><input type="checkbox" id="autoSpeak" ${autoSpeak ? "checked" : ""}>Đọc khi chọn thẻ</label></div><div class="aac-grid">${l.cards.map((card, i) => `<button class="aac-card" data-action="addWord" data-index="${i}" aria-label="${esc(card.text)}">${cardImage(card) ? `<img src="${esc(cardImage(card))}" alt="">` : `<span class="aac-symbol" aria-hidden="true">${esc(card.icon)}</span>`}<strong>${esc(card.text)}</strong></button>`).join("")}</div><div class="learning-bottom"><p class="hint">Hoàn thành sẽ lưu lượt thực hành và câu ghép. Điểm đúng/sai do người đồng hành ghi riêng.</p><button class="primary" data-action="completePractice">✓ Hoàn thành lượt học</button></div></section>`;
+    )}</select></label><span class="badge">${esc(c.name)}</span></div>${lessonVideo(l)}${activityMarkup(l)}${l.teachingGuide && user.role !== "child" ? `<button class="text-button" data-action="viewTeachingGuide" data-id="${esc(l.id)}">Hướng dẫn đồng hành và thực hành tại nhà</button>` : ""}<div class="learning-cue">${picture("buddy-request", "cue-buddy", true)}<h2>${esc(l.prompt)}</h2></div><p class="muted">1. Chạm vào hình · 2. Đọc câu · 3. Hoàn thành</p><div class="sentence-heading"><strong>Câu của con</strong><span>Chọn một thẻ nhiều lần nếu cần</span></div><div id="sentence" class="sentence" aria-live="polite">${sentenceMarkup()}</div><div class="button-row sentence-tools"><button class="secondary" data-action="speakSentence">🔊 Đọc câu</button><button class="text-button" data-action="undoWord">↶ Bỏ thẻ cuối</button><button class="text-button danger-text" data-action="clearSentence">Xóa câu</button><label class="check-label"><input type="checkbox" id="autoSpeak" ${autoSpeak ? "checked" : ""}>Đọc khi chọn thẻ</label></div><div class="aac-grid">${l.cards.map((card, i) => `<button class="aac-card" data-action="addWord" data-index="${i}" aria-label="${esc(card.text)}">${cardImage(card) ? `<img src="${esc(cardImage(card))}" alt="">` : `<span class="aac-symbol" aria-hidden="true">${esc(card.icon)}</span>`}<strong>${esc(card.text)}</strong></button>`).join("")}</div><div class="learning-bottom"><p class="hint">Hoàn thành sẽ lưu lượt thực hành và câu ghép. Điểm đúng/sai do người đồng hành ghi riêng.</p><button class="primary" data-action="completePractice">✓ Hoàn thành lượt học</button></div></section>`;
 }
 function lessonVideo(lesson) {
   if (lesson.drive) {
@@ -791,6 +799,7 @@ function settingsView() {
   return `<section class="panel account-panel"><h2>Tài khoản của tôi</h2><p>${esc(user.username)} · ${roles[user.role]}</p><form data-form="password">${field("Mật khẩu hiện tại", input("current", "", "password", 'required autocomplete="current-password" maxlength="200"'))}${field("Mật khẩu mới", input("password", "", "password", 'required minlength="6" maxlength="200" autocomplete="new-password"'))}<p class="form-error" role="alert"></p><button class="primary" type="submit">Đổi mật khẩu</button></form><hr><button class="secondary" data-action="logout">Đăng xuất</button></section><section class="panel install-panel"><h2>Cùng Con trên điện thoại</h2><p>Thêm ứng dụng vào màn hình chính để mở nhanh, với không gian hiển thị rộng hơn.</p><button class="primary" type="button" data-pwa-install hidden>Cài ứng dụng</button><p>Trên iPhone: mở bằng Safari → Chia sẻ → Thêm vào Màn hình chính. Trên Android: chọn Cài ứng dụng trong menu trình duyệt.</p><p class="muted">Cần kết nối mạng để đăng nhập, học và lưu dữ liệu.</p></section>`;
 }
 async function navigate(next) {
+  puzzleOpen = false;
   vietnameseSpeaker?.stop();
   modal.close();
   clearTimeout(toastTimer);
@@ -876,15 +885,37 @@ function migrateLegacy(old) {
     practiceSessions: [],
   };
 }
+function showTemplateEditor(template) {
+  const form=planEditor(template,data.lessons).replace('data-form="plan"','data-form="template"').replace('<p class="hint">',`<label>Tên lộ trình mẫu<input name="templateTitle" required maxlength="150" value="${esc(template.title)}"></label><label>Mô tả<textarea name="templateDescription" maxlength="1500">${esc(template.description)}</textarea></label><label>Bộ ảnh và trò chơi<select name="templateKind">${['life','animals','vehicles'].map(id=>option(id,journeyCatalog.find(j=>j.id===id).title,template.kind)).join('')}</select></label><p class="hint">`).replace('Lưu lộ trình của bé','Lưu bộ mẫu');
+  openModal(template.id?'Sửa lộ trình mẫu':'Tạo lộ trình mẫu',form);
+}
 const actions = {
+  newTemplate: () => showTemplateEditor({kind:'life',title:'',description:'',stages:[1,2,3].map(n=>({id:String(n),title:`Đích đến ${n}`,goal:'',lessonIds:[],lessonScores:{}}))}),
+  editTemplate: el => showTemplateEditor(data.journeyTemplates.find(t=>t.id===el.dataset.id)),
+  deleteTemplate: el => {
+    const template=data.journeyTemplates.find(t=>t.id===el.dataset.id);
+    openModal('Xóa lộ trình mẫu',`<p>Xóa mẫu <strong>${esc(template.title)}</strong> khỏi thư viện? Bản đã giao và điểm của học sinh được giữ nguyên.</p><button class="danger" data-action="confirmDeleteTemplate" data-id="${esc(template.id)}">Xác nhận xóa mẫu</button>`);
+  },
+  confirmDeleteTemplate: el => mutate('deleteTemplate',{id:el.dataset.id},'Đã xóa mẫu; bản đã giao vẫn được giữ.'),
+  assignTemplate: el => {
+    const template=data.journeyTemplates.find(t=>t.id===el.dataset.id);
+    const plan={childId,journeyId:template.id,title:template.title,description:template.description,kind:template.kind,stages:template.stages};
+    openModal(`Giao lộ trình cho ${currentChild().name}`,`<p>Kiểm tra bài rồi lưu. Nếu bé đã có bản của mẫu này, danh sách bài sẽ được cập nhật; điểm chỉ giữ cho bài còn trong cùng đích đến.</p>${planEditor(plan,data.lessons)}`);
+  },
+  viewJourneyResults: async () => { accept(await api('/api/state'));openModal('Kết quả của bé',teacherProgress(data,childId,selectedJourney)); },
+  unassignJourney: () => openModal('Gỡ lộ trình',`<p>Ẩn lộ trình này khỏi màn học của bé? Điểm và lịch sử vẫn được lưu. Có thể giao lại mẫu từ thư viện.</p><button class="danger" data-action="confirmUnassignJourney">Xác nhận gỡ</button>`),
+  confirmUnassignJourney: async () => { const id=selectedJourney;selectedJourney='';await mutate('archivePlan',{childId,journeyId:id},'Đã gỡ lộ trình khỏi màn học.'); },
+  openPuzzle: () => { puzzleOpen = true; vietnameseSpeaker?.stop(); render(); window.scrollTo(0,0); },
+  closePuzzle: () => { puzzleOpen = false; render(); },
   openJourney: (el) => {
-    if (!journeyCatalog.some((journey) => journey.id === el.dataset.id)) return;
+    if (!childJourneys().some((journey) => journey.id === el.dataset.id)) return;
     selectedJourney = el.dataset.id;
     selectedStage = "";
     return navigate("pathways");
   },
   showJourneys: () => {
     selectedJourney = "";
+    puzzleOpen = false;
     selectedStage = "";
     return navigate("pathways");
   },
@@ -1019,6 +1050,7 @@ const actions = {
   logout: async () => {
     vietnameseSpeaker?.stop();
     selectedJourney = "";
+    puzzleOpen = false;
     selectedStage = "";
     await api("/api/logout", {});
     data = null;
@@ -1029,6 +1061,7 @@ const actions = {
   editChild: (el) => editChild(el.dataset.id),
   selectChild: (el) => {
     selectedJourney = "";
+    puzzleOpen = false;
     selectedStage = "";
     childId = el.dataset.id;
     return navigate("dashboard");
@@ -1226,6 +1259,7 @@ document.addEventListener("submit", async (event) => {
         await load();
         selectedStage = "";
         selectedJourney = "";
+    puzzleOpen = false;
         view = user.role === "child" ? "pathways" : "dashboard";
         render();
         break;
@@ -1279,9 +1313,11 @@ document.addEventListener("submit", async (event) => {
           "Đã lưu điểm đánh giá của giáo viên.",
         );
         break;
+      case "template":
       case "plan": {
         const fields = new FormData(form);
-        const stages = currentPlan().stages.map((stage) => {
+        const base = JSON.parse(form.dataset.plan);
+        const stages = base.stages.map((stage) => {
           const selected = fields.getAll(`stage${stage.id}`);
           return {
             ...stage,
@@ -1293,9 +1329,14 @@ document.addEventListener("submit", async (event) => {
             ],
           };
         });
+        if(form.dataset.form === "template") {
+          await mutate("saveTemplate", {...base, id:base.id||undefined, title:values.templateTitle,description:values.templateDescription,kind:values.templateKind,stages}, "Đã lưu bộ mẫu dùng chung.");
+          break;
+        }
+        selectedJourney = base.journeyId || "life";
         await mutate(
           "savePlan",
-          { childId, journeyId: selectedJourney || "life", stages },
+          { ...base, childId, stages, archived:false },
           "Đã lưu lộ trình riêng của bé.",
         );
         break;
@@ -1397,6 +1438,7 @@ document.addEventListener("change", async (event) => {
     if (el.id === "childPicker") {
       childId = el.value;
       selectedJourney = "";
+    puzzleOpen = false;
       selectedStage = "";
       if (user.role === "child") view = "pathways";
       sentence = [];
@@ -1467,3 +1509,25 @@ document.addEventListener("change", async (event) => {
   }
 });
 boot();
+
+document.addEventListener("activity-speak", event => { vietnameseSpeaker?.stop(); speak(event.detail); });
+document.addEventListener("activity-stop", () => vietnameseSpeaker?.stop());
+let resultQueue=Promise.resolve();
+document.addEventListener('learning-result',event=>{
+  if(!user||!childId||user.role==='admin')return;
+  const itemId=event.detail.itemId||lessonId;
+  const plan=event.detail.kind==='puzzle'?currentPlan():data.learningPlans.find(p=>p.childId===childId&&!p.archived&&(p.journeyId||'life')===selectedJourney&&availableLessonIds(p).includes(itemId))||data.learningPlans.find(p=>p.childId===childId&&!p.archived&&availableLessonIds(p).includes(itemId));
+  if(!plan)return;
+  const actor=user.id,payload={...event.detail,id:crypto.randomUUID(),childId,itemId,journeyId:plan.journeyId||'life'};
+  const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Đang lưu kết quả…';event.target.append(status);
+  const save=async()=>{
+    if(user?.id!==actor){status.textContent='Phiên đăng nhập đã đổi; kết quả chưa được lưu.';return;}
+    try{
+      for(let attempt=0;attempt<3;attempt++){
+        try{const result=await api('/api/action',{action:'activityResult',payload,version});if(user?.id===actor)accept(result);status.textContent='✓ Đã lưu kết quả để giáo viên theo dõi.';return;}
+        catch(error){if(error.status!==409||attempt===2)throw error;const latest=await api('/api/state');if(user?.id!==actor)throw Error('Phiên đăng nhập đã đổi.');accept(latest);}
+      }
+    }catch(error){status.textContent='Chưa lưu được kết quả. ';const retry=document.createElement('button');retry.className='secondary';retry.textContent='Thử lưu lại';retry.onclick=()=>{retry.disabled=true;resultQueue=resultQueue.then(save);};status.append(retry);}
+  };
+  resultQueue=resultQueue.then(save);
+});

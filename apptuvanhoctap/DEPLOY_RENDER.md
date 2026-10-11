@@ -4,6 +4,10 @@
 
 ## Cập nhật ứng dụng đang chạy
 
+Bản cập nhật quản lý giáo viên tự bổ sung thư viện 3 mẫu lộ trình vào dữ liệu Supabase khi khởi động lần đầu. Các bản đã giao và điểm hiện có được giữ nguyên. Giáo viên tạo/sửa/xóa mẫu dùng chung rồi giao bản riêng cho từng học sinh; gỡ bản đã giao giữ lại lịch sử. Kết quả ghép ảnh, luyện 5 câu và câu hỏi video được lưu khi hoàn thành, tách khỏi điểm giáo viên. Không nhập đè SQLite local lên Supabase.
+
+40 tranh ghép (20 kỹ năng sống, 10 động vật, 10 xe cộ), giọng đọc và câu hỏi đi cùng mã nguồn. Không cần chạy SQL hoặc upload Storage. Chỉ các nguồn video đã có câu hỏi tương ứng mới hiện hoạt động video.
+
 Push nhánh `main` lên GitHub để Render tự deploy nếu Auto-Deploy đang bật. Khi phiên bản mới khởi động với `DATABASE_URL` hiện có, ứng dụng bổ sung 24 bài Động vật/Xe cộ và hai kế hoạch còn thiếu cho mỗi trẻ vào Supabase, giữ nguyên tài khoản, phân công, bài đã sửa và điểm cũ. Có 3 video được gắn vào 12 bài phù hợp; link giáo viên đã thêm hoặc chủ động xóa được giữ nguyên. Không chạy `db:migrate` để ghi đè database đang sử dụng.
 
 Ảnh/giọng đọc cập nhật theo mã nguồn; không cần upload Supabase Storage. Kiểm tra sau deploy bằng tài khoản giáo viên: đủ 3 thẻ lộ trình, bài mới có hình/giọng Việt và nút xem video. Tổng bộ bài mặc định hiện là **68 bài** (44 bài cũ + 24 bài mới), mỗi trẻ có 3 lộ trình.

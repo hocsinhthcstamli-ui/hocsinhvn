@@ -1,0 +1,38 @@
+import {test,expect} from '@playwright/test';
+
+test('Teacher creates a shared template, assigns a copy, edits and deletes safely',async({page})=>{
+  await page.goto('/');
+  await page.locator('[name=username]').fill('teacher');
+  await page.locator('[name=role]').selectOption('teacher');
+  await page.locator('[name=password]').fill('123456');
+  await page.locator('button[type=submit]').click();
+  await page.locator('.sidebar [data-view=pathways]').click();
+  await page.locator('[data-action=newTemplate]').click();
+  await page.locator('[name=templateTitle]').fill('Bộ mẫu thử nghiệm');
+  await page.locator('[name=stage1]').first().check();
+  await page.locator('form[data-form=template] button[type=submit]').click();
+  const card=page.locator('article').filter({has:page.getByRole('heading',{name:'Bộ mẫu thử nghiệm',exact:true})});
+  await expect(card).toBeVisible();
+  const templateId=await card.locator('[data-action=assignTemplate]').getAttribute('data-id');
+  await card.locator('[data-action=assignTemplate]').click();
+  await page.locator('form[data-form=plan] button[type=submit]').click();
+  await page.locator('[data-action=showJourneys]').click();
+  await expect(page.locator(`[data-action=openJourney][data-id="${templateId}"]`)).toBeVisible();
+  await card.locator('[data-action=editTemplate]').click();
+  await page.locator('[name=templateTitle]').fill('Bộ mẫu đã sửa');
+  await page.locator('form[data-form=template] button[type=submit]').click();
+  let data=(await(await page.request.get('/api/state')).json()).data;
+  expect(data.learningPlans.find(p=>p.journeyId===templateId).title).toBe('Bộ mẫu thử nghiệm');
+  await page.locator(`[data-action=deleteTemplate][data-id="${templateId}"]`).click();
+  await page.locator('[data-action=confirmDeleteTemplate]').click();
+  await expect(page.locator(`[data-action=deleteTemplate][data-id="${templateId}"]`)).toHaveCount(0);
+  await page.locator(`[data-action=openJourney][data-id="${templateId}"]`).click();
+  await page.locator('[data-action=viewJourneyResults]').click();
+  await expect(page.getByRole('heading',{name:'Tiến độ và kết quả thực hành'})).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.locator('[data-action=unassignJourney]').click();
+  await page.locator('[data-action=confirmUnassignJourney]').click();
+  await expect(page.locator(`[data-action=openJourney][data-id="${templateId}"]`)).toHaveCount(0);
+  data=(await(await page.request.get('/api/state')).json()).data;
+  expect(data.learningPlans.find(p=>p.journeyId===templateId).archived).toBe(true);
+});

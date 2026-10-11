@@ -51,7 +51,7 @@ export function stageUnlocked(plan, index) {
   );
 }
 export function availableLessonIds(plan) {
-  return plan
+  return plan && !plan.archived
     ? [
         ...new Set(
           plan.stages.flatMap((stage, index) =>

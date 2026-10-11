@@ -536,3 +536,11 @@
     background: white;
   }
 }
+.video-activity,.guided-activity { margin:24px 0; }
+.activity-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:18px 0; }
+.activity-choice { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; min-height:140px; border:2px solid #64866a; background:#e8f0e5; color:#26352b; border-radius:18px; padding:14px; font-size:1.1rem; }
+.activity-choice img { width:100%; max-width:150px; height:130px; object-fit:contain; border-radius:12px; }
+.activity-choice:disabled { opacity:.5; }
+.activity-feedback,.guided-feedback { min-height:2.5em; font-weight:600; }
+.guided-sentence { min-height:64px; padding:18px; margin-top:16px; border:2px solid #ccd8c8; border-radius:16px; background:white; font-size:1.15rem; }
+@media(max-width:600px) { .activity-options { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .activity-choice { padding:10px; font-size:1rem; } .activity-choice img { height:100px; } }
