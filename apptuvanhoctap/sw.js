@@ -1,5 +1,10 @@
-const CACHE = "cung-con-public-v27";
+const CACHE = "cung-con-public-v30";
 const PUBLIC_FILES = [
+  "/assets/avatars/student-01.webp",
+  "/assets/avatars/student-02.webp",
+  "/assets/avatars/student-03.webp",
+  "/assets/avatars/student-04.webp",
+  "/assets/avatars/student-05.webp",
   "/fun-model.mjs",
   "/fun-activities.mjs",
   "/computer-art.mjs",

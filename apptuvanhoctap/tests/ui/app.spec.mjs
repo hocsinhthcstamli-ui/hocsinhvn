@@ -163,7 +163,8 @@ test("Assigned teacher assesses, teaches and records; parent and learner have di
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await login(page, "teacher", "teacher");
-  await expect(page.getByText("Hôm nay Minh Anh")).toBeVisible();
+  await expect(page.locator('.teacher-dashboard')).toBeVisible();
+  await expect(page.locator('.teacher-student.selected')).toContainText('Minh Anh');
   await expect(
     page.locator('[data-view="teachers"],[data-view="users"]'),
   ).toHaveCount(0);

@@ -8,6 +8,7 @@ test('Teacher overview shows real progress and working dashboard actions', async
   await page.locator('button[type=submit]').click();
   await page.locator('.sidebar [data-view=dashboard]').click();
   await expect(page.locator('.teacher-dashboard')).toBeVisible();
+  await expect.poll(()=>page.locator('.student-avatar-image').evaluateAll(images=>images.length>0&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
   const {data} = await (await page.request.get('/api/state')).json();
   const selected = await page.locator('#childPicker').inputValue();
   const stages = data.learningPlans.filter(p=>p.childId===selected&&!p.archived).flatMap(p=>p.stages);

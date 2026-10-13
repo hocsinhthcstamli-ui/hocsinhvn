@@ -33,6 +33,7 @@ test('Teacher uploads four activities, learner plays and results remain separate
     let state=await(await p.request.get('/api/state')).json();
     const deny=await p.request.post('/api/action',{data:{version:state.version,action:'deleteFun',payload:{id:activities[0].id,journeyId:'life'}}});expect(deny.status()).toBe(403);
     for(const a of activities){
+      await p.locator(`[data-fun=category][data-kind="${a.kind}"]`).click();
       await p.locator(`[data-fun=play][data-id="${a.id}"]`).click();
       if(a.kind==='listen'){
         await p.locator('[data-fun=hear]').click();

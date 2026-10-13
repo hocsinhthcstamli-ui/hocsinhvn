@@ -22690,6 +22690,19 @@
       "mistakes": 1,
       "at": "2026-10-13T14:58:34.993Z",
       "authorId": "demo-student-39"
+    },
+    {
+      "id": "demo-activityResults-343",
+      "childId": "demo-student-01",
+      "journeyId": "life",
+      "itemId": "buddy-welcome",
+      "label": "Chào bạn mới",
+      "kind": "puzzle",
+      "total": 4,
+      "completed": 4,
+      "mistakes": 1,
+      "at": "2026-10-13T16:21:17.237Z",
+      "authorId": "demo-student-01"
     }
   ]
 }
