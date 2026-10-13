@@ -80,18 +80,26 @@ if ("serviceWorker" in navigator && window.isSecureContext) {
   navigator.serviceWorker
     .register("/sw.js")
     .then((registration) => {
+      let dismissedWorker;
+      const notice = document.getElementById("app-update");
+      notice.querySelector('.update-dismiss').onclick = () => {
+        dismissedWorker = registration.waiting;
+        notice.hidden = true;
+      };
       const notifyUpdate = () => {
-      if (!registration.waiting || !navigator.serviceWorker.controller) return;
-        const notice = document.getElementById("app-update");
-        notice.hidden = false;
-        notice.querySelector("button").onclick = () => {
+        const waiting = registration.waiting;
+        notice.hidden = !waiting || !navigator.serviceWorker.controller || waiting === dismissedWorker;
+        if (notice.hidden) return;
+        notice.querySelector("[data-update-apply]").onclick = () => {
+          if (registration.waiting !== waiting) { notifyUpdate(); return; }
           // A user chooses to reload, so a form is never interrupted automatically.
           navigator.serviceWorker.addEventListener(
             "controllerchange",
             () => location.reload(),
             { once: true },
           );
-          registration.waiting.postMessage({ type: "ACTIVATE_UPDATE" });
+          notice.hidden = true;
+          waiting.postMessage({ type: "ACTIVATE_UPDATE" });
         };
       };
       notifyUpdate();

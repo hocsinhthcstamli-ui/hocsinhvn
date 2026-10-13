@@ -299,11 +299,11 @@ textarea:focus-visible {
 #app-update {
   position: fixed;
   z-index: 100;
-  bottom: calc(90px + env(safe-area-inset-bottom));
-  left: 16px;
-  right: 16px;
-  max-width: 520px;
-  margin: auto;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: auto;
+  right: 20px;
+  width: min(360px, calc(100vw - 32px));
+  margin: 0;
   padding: 16px;
   border: 1px solid #64866a;
   border-radius: 18px;
@@ -312,6 +312,16 @@ textarea:focus-visible {
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+#app-update[hidden] { display: none; }
+#app-update > span { flex: 1 1 100%; padding-right: 24px; }
+#app-update .update-dismiss { position: absolute; top: 6px; right: 6px; width: 36px; height: 36px; padding: 0; background: transparent; color: #405b44; font-size: 24px; }
+@media (max-width: 700px) {
+  #app-update { right: 16px; bottom: calc(88px + env(safe-area-inset-bottom)); }
+  body:has(.auth-layout) #app-update { bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .keyboard-open #app-update { display: none; }
 }
 #app-update button {
   border: 0;

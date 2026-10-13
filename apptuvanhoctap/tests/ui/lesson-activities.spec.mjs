@@ -24,8 +24,14 @@ test('All built-in lessons have five spoken models; video exercises give feedbac
     await expect(page.locator('.guided-feedback')).toContainText(i===4?'đủ 5 câu':'ghép được');
     if(i<4)await page.locator('[data-activity=next]').click();
   }
+  await expect(page.locator('.learning-reward')).toContainText('Em giỏi quá!');
+  await expect(page.locator('.learning-reward .reward-stars span')).toHaveCount(3);
+  await expect(page.locator('.learning-reward')).toHaveCSS('opacity','1');
+  await expect(page.locator('.learning-reward .reward-stars span').last()).toHaveCSS('opacity','1');
   for(const width of [320,390,430]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
   await page.screenshot({path:'tmp/lesson-activities-mobile.png',fullPage:true});
+  await page.getByRole('button',{name:'Đóng lời khen'}).click();
+  await expect(page.locator('.learning-reward')).toHaveCount(0);
   await expect(page.locator('lesson-activities')).toContainText('Đã lưu kết quả');
   const after=(await(await page.request.get('/api/state')).json()).data;
   expect(after.learningPlans).toEqual(before.learningPlans);

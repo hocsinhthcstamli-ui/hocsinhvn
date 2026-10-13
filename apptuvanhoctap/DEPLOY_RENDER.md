@@ -4,6 +4,8 @@
 
 ## Cập nhật ứng dụng đang chạy
 
+Bản giao diện mới có màn đăng nhập, bảng tổng quan giáo viên dạng thẻ nổi, lời khen có sao khi hoàn thành bài và thông báo cập nhật PWA có nút đóng. Bộ 39 học sinh mô phỏng được lưu riêng tại `content/demo-class-39.json`, không chứa tài khoản hoặc phiên đăng nhập. Render deploy chỉ cập nhật mã và tài nguyên; **chưa tự nhập lớp demo vào Supabase**. Xem `content/DEMO_CLASS_39.md` để biết phạm vi dữ liệu. Không đưa SQLite local lên Git.
+
 Bản mới bổ sung lộ trình Toán và Máy tính: tổng 80 bài, 5 mẫu lộ trình. Khi khởi động, server nạp thêm hai mẫu; giáo viên chọn giao cho từng học sinh. Mục **Hoạt động vui vẻ** có ghép ảnh và bốn loại hoạt động do giáo viên quản lý.
 
 100 hoạt động mẫu (20 bài mỗi lộ trình) đã được nạp vào SQLite local bằng các script `scripts/seed-*-fun.mjs`. Mã nguồn, ảnh và âm thanh của bộ mẫu được đưa lên Git; **push Git không tự nhập 100 hoạt động này vào Supabase**. Các script nạp hiện dành cho SQLite, không chạy chúng trên ổ tạm Render. Khi cần đưa nội dung mẫu lên production, phải nhập bổ sung vào dữ liệu đang có, giữ bản sao lưu và các chỉnh sửa của giáo viên; không nhập đè database local.

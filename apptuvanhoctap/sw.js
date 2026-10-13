@@ -1,4 +1,4 @@
-const CACHE = "cung-con-public-v22";
+const CACHE = "cung-con-public-v27";
 const PUBLIC_FILES = [
   "/fun-model.mjs",
   "/fun-activities.mjs",

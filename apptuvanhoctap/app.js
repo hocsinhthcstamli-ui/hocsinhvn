@@ -228,6 +228,19 @@ function adminStudents() {
         )
   }`;
 }
+const rewardStars = '<div class="reward-stars" aria-hidden="true"><span>★</span><span>★</span><span>★</span></div>';
+let rewardTimer;
+function celebrateLearning() {
+  clearTimeout(rewardTimer);
+  document.querySelector('.learning-reward')?.remove();
+  const reward = document.createElement('aside');
+  reward.className = 'learning-reward';
+  reward.setAttribute('role', 'status');
+  reward.innerHTML = `${rewardStars}<strong>Em giỏi quá!</strong><p>Em đã hoàn thành bài rồi!</p><button type="button" aria-label="Đóng lời khen">Tiếp tục khám phá ✨</button>`;
+  reward.querySelector('button').onclick = () => { clearTimeout(rewardTimer); reward.remove(); };
+  document.body.append(reward);
+  rewardTimer = setTimeout(() => reward.remove(), 6500);
+}
 function toast(message, error = false) {
   const t = $("#toast");
   t.textContent = message;
@@ -347,17 +360,44 @@ async function boot() {
   }
 }
 function renderAuth(setup = false) {
-  app.innerHTML = `<main class="auth-layout"><section class="auth-story"><a class="brand" href="/">🌿 <span>Cùng Con</span></a><p class="eyebrow">TỪNG BƯỚC NHỎ, MỖI NGÀY</p><h1>Cùng con học.<br>Cùng con lớn lên.</h1><p>Một nơi để lưu hành trình học tập, thực hành giao tiếp AAC và kết nối gia đình với giáo viên.</p><div class="auth-tiles"><span>${picture("badge-connect", "auth-sticker", true)}<small>Giao tiếp</small></span><span>${picture("badge-start", "auth-sticker", true)}<small>Khám phá</small></span><span>${picture("badge-independent", "auth-sticker", true)}<small>Đồng hành</small></span></div></section><section class="auth-card"><span class="badge">${setup ? "Bắt đầu hành trình" : "Chào mừng trở lại"}</span><h2>${setup ? "Thiết lập ứng dụng" : "Đăng nhập"}</h2><p class="muted">${setup ? "Tạo tài khoản quản trị đầu tiên để quản lý hồ sơ và cấp tài khoản cho giáo viên, phụ huynh." : "Dùng tài khoản được quản trị viên cấp cho bạn."}</p><form data-form="${setup ? "setup" : "login"}">${field("Tên đăng nhập", input("username", "", "text", 'required minlength="3" maxlength="60" pattern="[a-zA-Z0-9._-]+" autocomplete="username"'))}${field(
-    "Vai trò",
-    `<select name="role" required aria-label="Vai trò">${
-      setup
-        ? option("admin", "Quản trị viên", "admin")
-        : '<option value="">Chọn vai trò</option>' +
-          Object.entries(roles)
-            .map(([id, label]) => option(id, label, ""))
-            .join("")
-    }</select>`,
-  )}${field("Mật khẩu", input("password", "", "password", `required ${setup ? 'minlength="6"' : ""} maxlength="200" autocomplete="${setup ? "new-password" : "current-password"}"`))}${setup ? '<p class="hint">Mật khẩu tối thiểu 6 ký tự. Hãy lưu lại để đăng nhập lần sau.</p>' : ""}<p class="form-error" role="alert"></p><button class="primary full" type="submit">${setup ? "Tạo tài khoản & bắt đầu" : "Đăng nhập"} →</button></form><p class="hint">Dữ liệu được lưu trên máy chủ của ứng dụng.</p></section></main>`;
+  const authIcon = (paths) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+  const person = authIcon('<circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2Z"/>');
+  const group = authIcon('<circle cx="9" cy="7" r="3"/><path d="M2 20v-2a7 7 0 0 1 14 0v2ZM17 4a3 3 0 0 1 0 6m2 4a6 6 0 0 1 3 6"/>');
+  const lock = authIcon('<rect x="4" y="10" width="16" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/>');
+  const eye = authIcon('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>');
+  app.innerHTML = `<main class="auth-layout">
+    <section class="auth-story"><a class="brand" href="/"><span aria-hidden="true">🌿</span> <span>Cùng Con</span></a>
+      <p class="eyebrow">TỪNG BƯỚC NHỎ, MỖI NGÀY</p>
+      <h1>Cùng con học.<br>Cùng con lớn lên.</h1>
+      <p>Một hành trình học tập, thực hành giao tiếp AAC<br class="auth-desktop-break"> và kết nối gia đình với giáo viên.</p>
+      <img class="auth-illustration" src="/assets/art/communication-together.webp" alt="Người lớn đồng hành cùng trẻ trên hành trình khám phá" width="720" height="720">
+    </section>
+    <section class="auth-card" aria-labelledby="auth-title">
+      <span class="badge"><span aria-hidden="true">🌿</span> ${setup ? "Bắt đầu hành trình" : "Chào mừng trở lại"}</span>
+      <h2 id="auth-title">${setup ? "Thiết lập ứng dụng" : "Đăng nhập"}</h2>
+      <p class="muted">${setup ? "Tạo tài khoản quản trị đầu tiên để quản lý hồ sơ và cấp tài khoản cho giáo viên, phụ huynh." : "Đăng nhập vào không gian học tập của bạn."}</p>
+      <form data-form="${setup ? "setup" : "login"}">
+        <label for="auth-username">Tên đăng nhập</label>
+        <div class="auth-input">${person}<input id="auth-username" name="username" type="text" required minlength="3" maxlength="60" pattern="[a-zA-Z0-9._-]+" autocomplete="username" placeholder="Nhập tên đăng nhập"></div>
+        <label for="auth-role">Vai trò</label>
+        <div class="auth-input">${group}<select id="auth-role" name="role" required>${setup ? option("admin", "Quản trị viên", "admin") : '<option value="">Chọn vai trò</option>' + Object.entries(roles).map(([id,label]) => option(id,label,"")).join("")}</select></div>
+        <label for="auth-password">Mật khẩu</label>
+        <div class="auth-input">${lock}<input id="auth-password" name="password" type="password" required ${setup ? 'minlength="6"' : ""} maxlength="200" autocomplete="${setup ? "new-password" : "current-password"}" placeholder="Nhập mật khẩu"><button class="auth-password-toggle" type="button" aria-label="Hiện mật khẩu" aria-pressed="false">${eye}</button></div>
+        ${setup ? '<p class="hint">Mật khẩu tối thiểu 6 ký tự. Hãy lưu lại để đăng nhập lần sau.</p>' : ""}
+        <p class="form-error" role="alert"></p>
+        <button class="primary full" type="submit">${setup ? "Tạo tài khoản & bắt đầu" : "Đăng nhập"} <span aria-hidden="true">→</span></button>
+      </form>
+      <details class="auth-help"><summary><span aria-hidden="true">ⓘ</span> Bạn cần trợ giúp?</summary><p>${setup ? "Tạo tên đăng nhập và mật khẩu riêng, rồi lưu lại để sử dụng lần sau." : "Nếu quên mật khẩu hoặc chưa có tài khoản, hãy liên hệ quản trị viên hoặc giáo viên phụ trách. Chọn đúng vai trò được cấp khi đăng nhập."}</p></details>
+      <div class="auth-footer"><span>🌿 Đồng hành cùng gia đình và giáo viên</span></div>
+    </section>
+  </main>`;
+  $('.auth-password-toggle').addEventListener('click', event => {
+    const password = $('#auth-password');
+    const visible = password.type === 'password';
+    password.type = visible ? 'text' : 'password';
+    event.currentTarget.setAttribute('aria-pressed', String(visible));
+    event.currentTarget.setAttribute('aria-label', visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+  });
 }
 
 function icon(name) {
@@ -460,12 +500,12 @@ function render() {
   };
   app.innerHTML = `<a class="skip-link" href="#view">Đến nội dung chính</a>
     <div class="mobile-header"><a class="brand" href="/">🌿 <span>Cùng Con</span></a><button class="secondary" data-action="openMenu" aria-haspopup="dialog">${icon("menu")} Menu</button></div>
-    <div class="shell ${view === "kid" ? "child-layout" : ""}">
+    <div class="shell ${manager() ? "teacher-shell" : ""} ${view === "kid" ? "child-layout" : ""}">
       <aside class="sidebar"><a class="brand" href="/">🌿 <span>Cùng Con<small>HỌC TẬP & GIAO TIẾP AAC</small></span></a>
         <nav aria-label="Điều hướng chính">${navigation()}</nav>
         <div class="user-box"><span class="avatar">${esc(user.name.slice(0, 1).toUpperCase())}</span><div><strong>${esc(user.name)}</strong><small>${roles[user.role]}</small></div><button class="icon-button" data-action="logout" aria-label="Đăng xuất" title="Đăng xuất">↪</button></div>
       </aside>
-      <main class="main"><header class="page-top"><div><p class="eyebrow">CÙNG CON MỖI NGÀY</p><h1>${view === "dashboard" ? "Hôm nay" : navItems().find(([id]) => id === view)[2]}</h1><p class="page-description">${descriptions[view]}</p></div>
+      <main class="main"><header class="page-top"><div><p class="eyebrow">CÙNG CON MỖI NGÀY</p><h1>${view === "dashboard" ? (manager() ? "Chào " + esc(user.name) + "!" : "Hôm nay") : navItems().find(([id]) => id === view)[2]}</h1><p class="page-description">${descriptions[view]}</p></div>
         <div class="child-picker"><span class="picker-avatar" aria-hidden="true">${c ? esc(c.name.slice(0, 1)) : "+"}</span><div><label for="childPicker">Đang đồng hành cùng</label><select id="childPicker" ${!data.children.length ? "disabled" : ""}>${data.children.length ? data.children.map((ch) => option(ch.id, ch.name, childId)).join("") : "<option>Chưa có hồ sơ</option>"}</select></div></div>
       </header><div id="view" data-page="${view}" tabindex="-1">${renderView(c)}</div><footer>Đồng hành từng bước · Cùng Con AAC <span>Mỗi tiến bộ nhỏ đều đáng được ghi nhận.</span></footer></main>
     </div>${mobileNavigation()}`;
@@ -508,6 +548,7 @@ function lessonTile(l) {
     )}</div><div class="tile-body"><div class="tags">${badge(domainName(l.domain))}${badge("Mức " + l.level)}</div><h3>${esc(l.title)}</h3><p>${esc(l.goal)}</p><button class="secondary" data-action="openLesson" data-id="${esc(l.id)}">Mở bài học <span>→</span></button></div></article>`;
 }
 function dashboard(c) {
+  if (manager()) return teacherDashboard(c);
   const a = assessment(c),
     records = sortedRecords(data.dailyRecords, c.id),
     suggested = recommended(c, data.lessons),
@@ -532,6 +573,31 @@ function dashboard(c) {
         .join("") ||
       '<p class="muted">Sau buổi học đầu tiên, kết quả và nhận xét sẽ hiện ở đây.</p>'
     }<button class="secondary" data-view="daily">Xem lịch sử buổi học →</button></section></div>`;
+}
+function teacherDashboard(c) {
+  const records = sortedRecords(data.dailyRecords, c.id);
+  const plans = data.learningPlans.filter(p => p.childId === c.id && !p.archived);
+  const stages = plans.flatMap(p => p.stages);
+  const slots = stages.reduce((n,s) => n + s.lessonIds.length, 0);
+  const graded = stages.reduce((n,s) => n + s.lessonIds.filter(id => Object.hasOwn(s.lessonScores || {}, id)).length, 0);
+  const progress = slots ? Math.round(graded / slots * 100) : 0;
+  const suggested = recommended(c, data.lessons).slice(0,3);
+  const latest = records[0];
+  const hasAssessment = id => data.assessmentHistory.some(h => h.childId === id);
+  const followUp = data.children.map(ch => {
+    const recent = sortedRecords(data.dailyRecords, ch.id)[0];
+    const assessed = hasAssessment(ch.id);
+    return { child: ch, reason: !assessed ? 'Chưa có đánh giá kỹ năng' : !recent ? 'Chưa ghi nhận buổi học' : recent.prompt >= 2 ? 'Buổi gần nhất còn cần hỗ trợ' : 'Xem lại kết quả và mục tiêu', priority: !assessed || !recent || recent.prompt >= 2 };
+  }).filter(item => item.priority).slice(0, 3);
+  return `<div class="teacher-dashboard">
+    <section class="teacher-support panel"><div class="section-heading"><h2>Học sinh cần theo dõi</h2><button class="text-button" data-view="children">Xem tất cả</button></div><p class="hint">Dựa trên đánh giá và buổi học đã ghi nhận.</p>${followUp.map(({child,reason},i)=>`<button class="support-student" data-action="selectChild" data-id="${esc(child.id)}"><span class="student-portrait tone-${i}" aria-hidden="true">${esc(child.name.trim().slice(0,1).toUpperCase())}</span><span><strong>${esc(child.name)}</strong><small>${reason}</small></span><span class="support-next">Theo dõi ${icon('arrow')}</span></button>`).join('')||'<p class="teacher-empty">Chưa có học sinh cần nhắc theo các tiêu chí trên. Bạn vẫn có thể xem từng hồ sơ.</p>'}</section>
+    <section class="teacher-progress panel"><div class="section-heading"><h2>Tiến độ ghi điểm</h2>${icon('reports')}</div><div class="teacher-ring"  role="img" aria-label="${progress}% bài trong lộ trình đã có điểm giáo viên"><svg class="teacher-ring-chart" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="43" fill="none" stroke="#dff2eb" stroke-width="9"/><circle cx="50" cy="50" r="43" fill="none" stroke="#1aaa90" stroke-width="9" pathLength="100" stroke-dasharray="${progress} 100" transform="rotate(-90 50 50)"/></svg><span>${slots ? progress+'%' : '—'}<small>đã ghi điểm</small></span></div><p><strong>${graded}/${slots} bài trong lộ trình</strong><br>của ${esc(c.name)} đã có điểm giáo viên.</p><button class="text-button" data-view="reports">Xem báo cáo →</button></section>
+    <section class="teacher-class"><div class="section-heading"><div><p class="teacher-kicker">MỖI TRẺ, MỘT HÀNH TRÌNH</p><h2>Học sinh phụ trách</h2></div><button class="text-button" data-view="children">Xem tất cả →</button></div><div class="teacher-students">${data.children.slice(0,4).map((ch,i)=>`<button class="teacher-student ${ch.id===c.id?'selected':''}" data-action="selectChild" data-id="${esc(ch.id)}" aria-pressed="${ch.id===c.id}"><span class="student-portrait tone-${i%4}" aria-hidden="true">${esc(ch.name.trim().slice(0,1).toUpperCase())}</span><strong>${esc(ch.name)}</strong><span class="student-level">${hasAssessment(ch.id)?esc(assessment(ch).label):'Chưa có đánh giá'}</span><small>${data.dailyRecords.filter(r=>r.childId===ch.id).length} buổi đã ghi nhận</small></button>`).join('')}</div></section>
+    <section class="teacher-summary panel"><h2>Buổi học của ${esc(c.name)}</h2><div class="teacher-stat"><span>Buổi đã ghi nhận</span><strong>${records.length}</strong></div><div class="teacher-stat"><span>Lượt thực hành AAC</span><strong>${data.practiceSessions.filter(p=>p.childId===c.id).length}</strong></div><div class="teacher-stat"><span>Kết quả gần nhất</span><strong>${latest?percent(latest.correct,latest.total)+'%':'—'}</strong></div><p class="hint">${latest?'Ghi nhận ngày '+formatDate(latest.date):'Chưa có kết quả buổi học.'}</p><button class="secondary full" data-action="editRecord">+ Ghi kết quả buổi học</button></section>
+    <section class="teacher-lessons"><div class="section-heading"><h2>Bài học gợi ý</h2><button class="text-button" data-view="lessons">Xem tất cả →</button></div><div class="lesson-grid">${suggested.map(lessonTile).join('')||'<p class="muted">Chưa có bài phù hợp. Hãy xem thư viện bài học.</p>'}</div></section>
+    <section class="teacher-actions panel"><p class="teacher-kicker">ĐỒNG HÀNH CÙNG CON</p><h2>Bước tiếp theo</h2><p class="muted">Dành cho ${esc(c.name)}</p><button class="teacher-action" data-view="assessment"><span class="action-symbol">${icon('assessment')}</span><span><strong>${hasAssessment(c.id)?'Cập nhật đánh giá':'Đánh giá lần đầu'}</strong><small>Ghi nhận khả năng và mức hỗ trợ</small></span>${icon('arrow')}</button><button class="teacher-action" data-view="pathways"><span class="action-symbol">${icon('lessons')}</span><span><strong>${plans.length?'Tiếp tục lộ trình':'Chọn lộ trình cho con'}</strong><small>${plans.length} lộ trình đang được giao</small></span>${icon('arrow')}</button><button class="teacher-action" data-view="daily"><span class="action-symbol">${icon('daily')}</span><span><strong>Xem lại buổi học</strong><small>Đọc kết quả và nhận xét đã lưu</small></span>${icon('arrow')}</button></section>
+    <section class="teacher-history panel"><div class="section-heading"><h2>Ghi nhận gần đây</h2><button class="text-button" data-view="daily">Xem lịch sử →</button></div>${records.slice(0,3).map(r=>recordCard(r,false)).join('')||'<div class="teacher-empty">Chưa có ghi nhận. Sau mỗi buổi học, lưu kết quả để theo dõi tiến bộ của con.</div>'}</section>
+  </div>`;
 }
 function childrenView() {
   return `<div class="section-heading"><p class="muted">${data.children.length} hồ sơ · Theo dõi riêng hành trình của từng trẻ.</p></div><div class="profile-grid">${data.children.map((ch) => `<article class="panel profile-card"><span class="profile-avatar">${esc(ch.name.slice(0, 1))}</span><h2>${esc(ch.name)}</h2><p class="muted">Sinh năm ${ch.birthYear}</p>${badge(assessment(ch).label)}<p>${esc(ch.goals || "Chưa đặt mục tiêu.")}</p><p class="muted">${esc(ch.supportNote)}</p><div class="button-row"><button class="secondary" data-action="selectChild" data-id="${esc(ch.id)}">Theo dõi</button><button class="text-button" data-action="editChild" data-id="${esc(ch.id)}">Sửa</button>${user.role === "admin" ? `<button class="text-button danger-text" data-action="askDeleteChild" data-id="${esc(ch.id)}">Xóa</button>` : ""}</div></article>`).join("") || empty("Chưa có hồ sơ", "Nhấn “Thêm hồ sơ” để bắt đầu.")}</div>`;
@@ -1114,8 +1180,8 @@ const actions = {
     sentence = [];
     render();
     openModal(
-      "Con đã hoàn thành lượt học!",
-      `<div class="completion">${picture("buddy-success", "completion-sticker", true)}<p>Đã lưu lượt thực hành của ${esc(currentChild().name)}.</p><p class="muted">${user.role === "child" ? "Con có thể tiếp tục học khi sẵn sàng." : "Bạn có muốn ghi nhận kết quả của buổi học này không?"}</p></div><div class="form-actions"><button class="secondary" data-action="closeModal">Học tiếp</button>${user.role !== "child" ? '<button class="primary" data-action="recordAfterPractice">Ghi kết quả buổi học</button>' : ""}</div>`,
+      "Em giỏi quá!",
+      `<div class="completion">${rewardStars}<p class="reward-praise">Em đã hoàn thành lượt học rồi!</p>${picture("buddy-success", "completion-sticker", true)}<p>Đã lưu lượt thực hành của ${esc(currentChild().name)}.</p><p class="muted">${user.role === "child" ? "Con có thể tiếp tục học khi sẵn sàng." : "Bạn có muốn ghi nhận kết quả của buổi học này không?"}</p></div><div class="form-actions"><button class="secondary" data-action="closeModal">Học tiếp</button>${user.role !== "child" ? '<button class="primary" data-action="recordAfterPractice">Ghi kết quả buổi học</button>' : ""}</div>`,
     );
   },
   editRecord: (el) => editRecord(el.dataset.id),
@@ -1517,6 +1583,7 @@ document.addEventListener("activity-stop", () => vietnameseSpeaker?.stop());
 let resultQueue=Promise.resolve();
 document.addEventListener('learning-result',event=>{
   if(!user||!childId||user.role==='admin')return;
+  if(event.detail.total > 0 && event.detail.completed === event.detail.total) celebrateLearning();
   const itemId=event.detail.itemId||lessonId;
   const plan=(event.detail.kind==='puzzle'||funKinds[event.detail.kind])?currentPlan():data.learningPlans.find(p=>p.childId===childId&&!p.archived&&(p.journeyId||'life')===selectedJourney&&availableLessonIds(p).includes(itemId))||data.learningPlans.find(p=>p.childId===childId&&!p.archived&&availableLessonIds(p).includes(itemId));
   if(!plan)return;
